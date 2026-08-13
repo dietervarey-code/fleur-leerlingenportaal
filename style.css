@@ -855,35 +855,219 @@ section {
    SCHOOLKALENDER
 ======================================== */
 
-.kalender-item {
+.kalender-legenda {
 
-    background-color:
-        rgba(0, 0, 0, 0.04);
+    display:
+        flex;
 
-    padding:
-        14px;
+    gap:
+        12px;
 
-    margin:
-        10px 0;
-
-    border-radius:
-        14px;
-
-}
-
-
-.kalender-item strong {
-
-    font-size:
-        17px;
-
-}
-
-
-.kalender-item p {
+    flex-wrap:
+        wrap;
 
     margin-bottom:
-        0;
+        16px;
+
+}
+
+.kalender-legenda span {
+
+    font-size:
+        13px;
+
+    padding:
+        4px 10px;
+
+    border-radius:
+        20px;
+
+    font-weight:
+        500;
+
+}
+
+.legenda-vakantie {
+
+    background:
+        #fff3cd;
+
+    color:
+        #7a5c00;
+
+}
+
+.legenda-vrij {
+
+    background:
+        #dce9ff;
+
+    color:
+        #1a3a7a;
+
+}
+
+.legenda-vandaag {
+
+    background:
+        #4a90e2;
+
+    color:
+        white;
+
+}
+
+#kalender {
+
+    display:
+        flex;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        16px;
+
+}
+
+.kalender-maand {
+
+    background:
+        var(--menu-kleur);
+
+    border-radius:
+        16px;
+
+    padding:
+        14px 12px;
+
+    flex:
+        1 1 260px;
+
+    min-width:
+        260px;
+
+}
+
+.kalender-maand-naam {
+
+    font-weight:
+        bold;
+
+    font-size:
+        15px;
+
+    text-align:
+        center;
+
+    margin-bottom:
+        10px;
+
+    text-transform:
+        capitalize;
+
+}
+
+.kalender-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(7, 1fr);
+
+    gap:
+        2px;
+
+}
+
+.kalender-dag-naam {
+
+    text-align:
+        center;
+
+    font-size:
+        11px;
+
+    font-weight:
+        bold;
+
+    color:
+        #999;
+
+    padding:
+        4px 0;
+
+}
+
+.kalender-dag {
+
+    text-align:
+        center;
+
+    font-size:
+        13px;
+
+    padding:
+        5px 2px;
+
+    border-radius:
+        6px;
+
+    cursor:
+        default;
+
+    line-height:
+        1.4;
+
+}
+
+.kalender-dag.weekend {
+
+    color:
+        #aaa;
+
+}
+
+.kalender-dag.vakantie {
+
+    background-color:
+        #fff3cd;
+
+    color:
+        #7a5c00;
+
+    font-weight:
+        500;
+
+}
+
+.kalender-dag.vrij {
+
+    background-color:
+        #dce9ff;
+
+    color:
+        #1a3a7a;
+
+    font-weight:
+        bold;
+
+}
+
+.kalender-dag.vandaag {
+
+    background-color:
+        #4a90e2;
+
+    color:
+        white;
+
+    font-weight:
+        bold;
+
+    border-radius:
+        50%;
 
 }
 

@@ -2054,6 +2054,174 @@ function laadKleuren() {
 
 
 /* ========================================
+   SCHOOLKALENDER
+======================================== */
+
+function toonKalender() {
+
+    const container =
+        document.getElementById("kalender");
+
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    const maandNamen = [
+        "", "januari", "februari", "maart",
+        "april", "mei", "juni", "juli",
+        "augustus", "september", "oktober",
+        "november", "december"
+    ];
+
+    const dagNamen =
+        ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
+
+    // Schooljaar: september 2026 t/m juni 2027
+    const schoolMaanden = [
+        { jaar: 2026, maand: 9  },
+        { jaar: 2026, maand: 10 },
+        { jaar: 2026, maand: 11 },
+        { jaar: 2026, maand: 12 },
+        { jaar: 2027, maand: 1  },
+        { jaar: 2027, maand: 2  },
+        { jaar: 2027, maand: 3  },
+        { jaar: 2027, maand: 4  },
+        { jaar: 2027, maand: 5  },
+        { jaar: 2027, maand: 6  }
+    ];
+
+
+    schoolMaanden.forEach(function({ jaar, maand }) {
+
+        const blok =
+            document.createElement("div");
+
+        blok.className = "kalender-maand";
+
+
+        // Maandtitel
+        const titel =
+            document.createElement("div");
+
+        titel.className = "kalender-maand-naam";
+        titel.textContent =
+            maandNamen[maand] + " " + jaar;
+
+        blok.appendChild(titel);
+
+
+        // Grid
+        const grid =
+            document.createElement("div");
+
+        grid.className = "kalender-grid";
+
+
+        // Dag-header rij (Ma Di Wo Do Vr Za Zo)
+        dagNamen.forEach(function(d) {
+
+            const h = document.createElement("div");
+            h.className = "kalender-dag-naam";
+            h.textContent = d;
+            grid.appendChild(h);
+
+        });
+
+
+        // Lege cellen vóór de eerste dag
+        const eerstedag =
+            new Date(jaar, maand - 1, 1);
+
+        let startOffset = eerstedag.getDay();
+
+        // Omzetten naar maandag = 0
+        startOffset =
+            startOffset === 0 ? 6 : startOffset - 1;
+
+        for (let i = 0; i < startOffset; i++) {
+
+            const leeg =
+                document.createElement("div");
+
+            leeg.className = "kalender-dag leeg";
+            grid.appendChild(leeg);
+
+        }
+
+
+        // Dagen van de maand
+        const aantalDagen =
+            new Date(jaar, maand, 0).getDate();
+
+
+        for (let d = 1; d <= aantalDagen; d++) {
+
+            const dagStr =
+                `${jaar}-${String(maand).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+
+            const cel =
+                document.createElement("div");
+
+            cel.className = "kalender-dag";
+            cel.textContent = d;
+
+
+            // Weekend
+            const dagDatum =
+                new Date(jaar, maand - 1, d);
+
+            const dagNr = dagDatum.getDay();
+
+            if (dagNr === 0 || dagNr === 6) {
+                cel.classList.add("weekend");
+            }
+
+
+            // Vakantie
+            for (const v of vakanties) {
+
+                if (
+                    dagStr >= v.begin &&
+                    dagStr <= v.einde
+                ) {
+                    cel.classList.add("vakantie");
+                    cel.title = v.naam;
+                    break;
+                }
+
+            }
+
+
+            // Vrije dag (overschrijft vakantie-stijl)
+            if (vrijeDagen[dagStr]) {
+
+                cel.classList.remove("vakantie");
+                cel.classList.add("vrij");
+                cel.title = vrijeDagen[dagStr];
+
+            }
+
+
+            // Vandaag
+            if (dagStr === datum) {
+                cel.classList.add("vandaag");
+            }
+
+
+            grid.appendChild(cel);
+
+        }
+
+
+        blok.appendChild(grid);
+        container.appendChild(blok);
+
+    });
+
+}
+
+
+/* ========================================
    PAGINA STARTEN
 ======================================== */
 
@@ -2067,6 +2235,8 @@ window.onload =
         toonHobbies();
 
         toonTaken();
+
+        toonKalender();
 
         laadKleuren();
 
