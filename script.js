@@ -1049,6 +1049,453 @@ function deadlineTekst(dateString, klasse) {
 }
 
 
+/* ========================================
+   HOBBY'S
+======================================== */
+
+let hobbies =
+    JSON.parse(
+        localStorage.getItem("hobbies")
+    ) || [];
+
+
+const DAGKORTE =
+    ["zo", "ma", "di", "wo", "do", "vr", "za"];
+
+const DAGVOLUIT =
+    ["zondag", "maandag", "dinsdag", "woensdag",
+     "donderdag", "vrijdag", "zaterdag"];
+
+
+/* --- Week helpers --- */
+
+function getMaandag() {
+
+    const v = new Date();
+    v.setHours(0, 0, 0, 0);
+
+    const dag = v.getDay();
+    const offset =
+        dag === 0 ? -6 : 1 - dag;
+
+    const maandag = new Date(v);
+    maandag.setDate(v.getDate() + offset);
+
+    return maandag;
+
+}
+
+
+function getDatumString(datum) {
+
+    return `${datum.getFullYear()}-${String(datum.getMonth() + 1).padStart(2, "0")}-${String(datum.getDate()).padStart(2, "0")}`;
+
+}
+
+
+function getWeekString() {
+
+    const maandag = getMaandag();
+
+    const start =
+        new Date(maandag.getFullYear(), 0, 1);
+
+    const weekNr =
+        Math.ceil(
+            ((maandag - start) / 86400000 +
+             start.getDay() + 1) / 7
+        );
+
+    return `${maandag.getFullYear()}-W${String(weekNr).padStart(2, "0")}`;
+
+}
+
+
+function getHobbyDatumDezeWeek(hobby) {
+
+    const maandag = getMaandag();
+
+    // dag: 0=zo, 1=ma ... 6=za
+    // Offset from Monday: ma→0, di→1 ... za→5, zo→6
+    const offset =
+        hobby.dag === 0 ? 6 : hobby.dag - 1;
+
+    const datum = new Date(maandag);
+    datum.setDate(maandag.getDate() + offset);
+
+    return datum;
+
+}
+
+
+/* --- Skip-beheer (niet deze week) --- */
+
+function getOvergeslagenIds() {
+
+    const opgeslagen =
+        JSON.parse(
+            localStorage.getItem("overgeslagen")
+            || '{"week":"","ids":[]}'
+        );
+
+    if (opgeslagen.week !== getWeekString()) {
+        return [];
+    }
+
+    return opgeslagen.ids || [];
+
+}
+
+
+function slaanOver(hobbyId) {
+
+    const ids = getOvergeslagenIds();
+
+    if (!ids.includes(hobbyId)) {
+        ids.push(hobbyId);
+    }
+
+    localStorage.setItem(
+        "overgeslagen",
+        JSON.stringify({
+            week: getWeekString(),
+            ids: ids
+        })
+    );
+
+    toonHobbies();
+    toonTaken();
+
+}
+
+
+function herstelHobby(hobbyId) {
+
+    const ids =
+        getOvergeslagenIds()
+            .filter(function(id) {
+                return id !== hobbyId;
+            });
+
+    localStorage.setItem(
+        "overgeslagen",
+        JSON.stringify({
+            week: getWeekString(),
+            ids: ids
+        })
+    );
+
+    toonHobbies();
+    toonTaken();
+
+}
+
+
+/* --- Hobby popup --- */
+
+let geselecteerdHobbyIcono = "⚽";
+let geselecteerdDag = 1;
+
+
+function voegHobbyToe() {
+
+    geselecteerdHobbyIcono = "⚽";
+    geselecteerdDag = 1;
+
+
+    document.getElementById(
+        "hobby-naam"
+    ).value = "";
+
+    document.getElementById(
+        "hobby-van"
+    ).value = "14:00";
+
+    document.getElementById(
+        "hobby-tot"
+    ).value = "16:00";
+
+
+    document.querySelectorAll(
+        "#hobby-icoon-kiezer .icoon-optie"
+    ).forEach(function(btn) {
+        btn.classList.remove("geselecteerd");
+    });
+
+    const eersteIcono =
+        document.querySelector(
+            "#hobby-icoon-kiezer .icoon-optie"
+        );
+
+    if (eersteIcono) {
+        eersteIcono.classList.add("geselecteerd");
+    }
+
+
+    document.querySelectorAll(
+        ".dag-chip"
+    ).forEach(function(btn) {
+        btn.classList.toggle(
+            "geselecteerd",
+            parseInt(btn.dataset.dag) === 1
+        );
+    });
+
+
+    document.getElementById(
+        "hobby-popup"
+    ).style.display = "flex";
+
+
+    setTimeout(function() {
+        document.getElementById(
+            "hobby-naam"
+        ).focus();
+    }, 100);
+
+}
+
+
+function kiesHobbyIcono(icoon) {
+
+    geselecteerdHobbyIcono = icoon;
+
+    document.querySelectorAll(
+        "#hobby-icoon-kiezer .icoon-optie"
+    ).forEach(function(btn) {
+
+        btn.classList.toggle(
+            "geselecteerd",
+            btn.textContent.trim() === icoon
+        );
+
+    });
+
+}
+
+
+function kiesDag(dag) {
+
+    geselecteerdDag = dag;
+
+    document.querySelectorAll(
+        ".dag-chip"
+    ).forEach(function(btn) {
+
+        btn.classList.toggle(
+            "geselecteerd",
+            parseInt(btn.dataset.dag) === dag
+        );
+
+    });
+
+}
+
+
+function bevestigHobby() {
+
+    const naam =
+        document.getElementById(
+            "hobby-naam"
+        ).value.trim();
+
+
+    if (!naam) {
+
+        document.getElementById(
+            "hobby-naam"
+        ).focus();
+
+        return;
+
+    }
+
+    const van =
+        document.getElementById("hobby-van").value;
+
+    const tot =
+        document.getElementById("hobby-tot").value;
+
+
+    if (!van || !tot) {
+        return;
+    }
+
+
+    hobbies.push({
+        id: Date.now(),
+        icoon: geselecteerdHobbyIcono,
+        naam: naam,
+        dag: geselecteerdDag,
+        vanUur: van,
+        totUur: tot
+    });
+
+
+    localStorage.setItem(
+        "hobbies",
+        JSON.stringify(hobbies)
+    );
+
+
+    toonHobbies();
+    toonTaken();
+    sluitHobbyPopup();
+
+}
+
+
+function sluitHobbyPopup() {
+
+    document.getElementById(
+        "hobby-popup"
+    ).style.display = "none";
+
+}
+
+
+/* --- Hobby beheer weergeven --- */
+
+function toonHobbies() {
+
+    const lijst =
+        document.getElementById("hobbies");
+
+    if (!lijst) return;
+
+
+    lijst.innerHTML = "";
+
+
+    if (hobbies.length === 0) {
+
+        lijst.innerHTML =
+            `<p class="leeg">
+                Nog geen hobby's toegevoegd.
+            </p>`;
+
+        return;
+
+    }
+
+    const overgeslagenIds =
+        getOvergeslagenIds();
+
+
+    hobbies.forEach(function(hobby, index) {
+
+        const isOvergeslagen =
+            overgeslagenIds.includes(hobby.id);
+
+        const datumDezeWeek =
+            getHobbyDatumDezeWeek(hobby);
+
+        const dagLabel =
+            DAGVOLUIT[hobby.dag];
+
+
+        lijst.innerHTML += `
+
+            <div class="hobby-rij ${isOvergeslagen ? "overgeslagen" : ""}">
+
+                <div class="hobby-rij-info">
+
+                    <div class="hobby-rij-naam">
+                        ${hobby.icoon} ${hobby.naam}
+                    </div>
+
+                    <div class="hobby-rij-schema">
+                        ${dagLabel} · ${hobby.vanUur} – ${hobby.totUur}
+                    </div>
+
+                </div>
+
+
+                <div class="hobby-rij-acties">
+
+                    <button
+                        class="hobby-week-knop ${isOvergeslagen ? "herstel" : ""}"
+                        onclick="${isOvergeslagen
+                            ? `herstelHobby(${hobby.id})`
+                            : `slaanOver(${hobby.id})`}">
+                        ${isOvergeslagen
+                            ? "↺ Toch erbij"
+                            : "Niet deze week"}
+                    </button>
+
+                    <button
+                        class="verwijder"
+                        onclick="verwijderHobby(${index})">
+                        🗑️
+                    </button>
+
+                </div>
+
+            </div>
+
+        `;
+
+    });
+
+}
+
+
+function verwijderHobby(index) {
+
+    hobbies.splice(index, 1);
+
+    localStorage.setItem(
+        "hobbies",
+        JSON.stringify(hobbies)
+    );
+
+    toonHobbies();
+    toonTaken();
+
+}
+
+
+/* --- Gecombineerde planning --- */
+
+function toonHobbyBlok(lijst, hobby, datumStr) {
+
+    const [j, ma, d] =
+        datumStr.split("-").map(Number);
+
+    const datum = new Date(j, ma - 1, d);
+
+    const dagKort =
+        DAGKORTE[datum.getDay()];
+
+    const maandKort =
+        datum.toLocaleDateString("nl-BE", {
+            month: "short"
+        });
+
+
+    lijst.innerHTML += `
+
+        <div class="hobby-blok">
+
+            <div class="hobby-blok-info">
+
+                <div class="hobby-blok-naam">
+                    ${hobby.icoon} ${hobby.naam}
+                </div>
+
+                <div class="hobby-blok-tijd">
+                    ${dagKort}. ${d} ${maandKort} · ${hobby.vanUur} – ${hobby.totUur}
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
 /* --- Taken weergeven --- */
 
 function toonTaken() {
@@ -1067,11 +1514,73 @@ function toonTaken() {
     lijst.innerHTML = "";
 
 
-    if (taken.length === 0) {
+    // --- Datumgrenzen voor hobby's ---
+    const v = new Date();
+    v.setHours(0, 0, 0, 0);
+
+    const vandaagStr = getDatumString(v);
+
+    const maandag = getMaandag();
+    const zondag = new Date(maandag);
+    zondag.setDate(maandag.getDate() + 6);
+    const zondagStr = getDatumString(zondag);
+
+    const overgeslagenIds = getOvergeslagenIds();
+
+
+    // --- Gecombineerde items bouwen ---
+    const items = [];
+
+    hobbies.forEach(function(hobby) {
+
+        if (overgeslagenIds.includes(hobby.id)) {
+            return;
+        }
+
+        const datumDezeWeek =
+            getHobbyDatumDezeWeek(hobby);
+
+        const datumStr =
+            getDatumString(datumDezeWeek);
+
+        if (
+            datumStr >= vandaagStr &&
+            datumStr <= zondagStr
+        ) {
+
+            items.push({
+                type: "hobby",
+                hobby: hobby,
+                datumStr: datumStr,
+                sortKey: datumStr + " " + hobby.vanUur
+            });
+
+        }
+
+    });
+
+    taken.forEach(function(taak, index) {
+
+        items.push({
+            type: "taak",
+            taak: taak,
+            index: index,
+            sortKey:
+                (taak.deadline || "9999-12-31") + " 23:59"
+        });
+
+    });
+
+    items.sort(function(a, b) {
+        return a.sortKey.localeCompare(b.sortKey);
+    });
+
+
+    if (items.length === 0) {
 
         lijst.innerHTML =
             `<p class="leeg">
-                Nog geen taken toegevoegd.
+                Nog geen taken of hobby's gepland.
             </p>`;
 
         return;
@@ -1079,7 +1588,24 @@ function toonTaken() {
     }
 
 
-    taken.forEach(function(taak, index) {
+    items.forEach(function(item) {
+
+        if (item.type === "hobby") {
+
+            toonHobbyBlok(
+                lijst,
+                item.hobby,
+                item.datumStr
+            );
+
+            return;
+
+        }
+
+
+        // --- Taak ---
+        const taak = item.taak;
+        const index = item.index;
 
         const vak =
             taak.vak || null;
@@ -1647,6 +2173,8 @@ window.onload =
         toonSchoolStatus();
 
         toonLessen();
+
+        toonHobbies();
 
         toonTaken();
 
