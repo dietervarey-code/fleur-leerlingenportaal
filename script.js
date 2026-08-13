@@ -634,16 +634,30 @@ function verwijderDoel(index) {
 
 
 /* ========================================
+   KLEUREN HULPFUNCTIE
+======================================== */
+
+function markeerSwatch(gridId, kleur) {
+
+    document.querySelectorAll(
+        "#" + gridId + " .kleur-swatch"
+    ).forEach(function(swatch) {
+
+        swatch.classList.toggle(
+            "geselecteerd",
+            swatch.dataset.kleur === kleur
+        );
+
+    });
+
+}
+
+
+/* ========================================
    ACHTERGRONDKLEUR
 ======================================== */
 
-function veranderAchtergrond() {
-
-    const kleur =
-        document.getElementById(
-            "achtergrond"
-        ).value;
-
+function kiesAchtergrond(kleur) {
 
     document.documentElement
         .style
@@ -658,6 +672,12 @@ function veranderAchtergrond() {
         kleur
     );
 
+
+    markeerSwatch(
+        "achtergrond-grid",
+        kleur
+    );
+
 }
 
 
@@ -665,13 +685,7 @@ function veranderAchtergrond() {
    MENU KLEUR
 ======================================== */
 
-function veranderMenuKleur() {
-
-    const kleur =
-        document.getElementById(
-            "menuKleur"
-        ).value;
-
+function kiesMenuKleur(kleur) {
 
     document.documentElement
         .style
@@ -683,6 +697,12 @@ function veranderMenuKleur() {
 
     localStorage.setItem(
         "menuKleur",
+        kleur
+    );
+
+
+    markeerSwatch(
+        "menu-kleur-grid",
         kleur
     );
 
@@ -702,44 +722,9 @@ function resetKleuren() {
         "#ffffff";
 
 
-    document.documentElement
-        .style
-        .setProperty(
-            "--achtergrond-kleur",
-            achtergrond
-        );
+    kiesAchtergrond(achtergrond);
 
-
-    document.documentElement
-        .style
-        .setProperty(
-            "--menu-kleur",
-            menu
-        );
-
-
-    document.getElementById(
-        "achtergrond"
-    ).value =
-        achtergrond;
-
-
-    document.getElementById(
-        "menuKleur"
-    ).value =
-        menu;
-
-
-    localStorage.setItem(
-        "achtergrond",
-        achtergrond
-    );
-
-
-    localStorage.setItem(
-        "menuKleur",
-        menu
-    );
+    kiesMenuKleur(menu);
 
 }
 
@@ -779,55 +764,41 @@ function closeSettings() {
 function laadKleuren() {
 
     const opgeslagenAchtergrond =
-        localStorage.getItem(
-            "achtergrond"
-        );
+        localStorage.getItem("achtergrond")
+        || "#eef4ff";
 
 
     const opgeslagenMenu =
-        localStorage.getItem(
-            "menuKleur"
+        localStorage.getItem("menuKleur")
+        || "#ffffff";
+
+
+    document.documentElement
+        .style
+        .setProperty(
+            "--achtergrond-kleur",
+            opgeslagenAchtergrond
         );
 
 
-    if (
+    document.documentElement
+        .style
+        .setProperty(
+            "--menu-kleur",
+            opgeslagenMenu
+        );
+
+
+    markeerSwatch(
+        "achtergrond-grid",
         opgeslagenAchtergrond
-    ) {
-
-        document.documentElement
-            .style
-            .setProperty(
-                "--achtergrond-kleur",
-                opgeslagenAchtergrond
-            );
+    );
 
 
-        document.getElementById(
-            "achtergrond"
-        ).value =
-            opgeslagenAchtergrond;
-
-    }
-
-
-    if (
+    markeerSwatch(
+        "menu-kleur-grid",
         opgeslagenMenu
-    ) {
-
-        document.documentElement
-            .style
-            .setProperty(
-                "--menu-kleur",
-                opgeslagenMenu
-            );
-
-
-        document.getElementById(
-            "menuKleur"
-        ).value =
-            opgeslagenMenu;
-
-    }
+    );
 
 }
 
