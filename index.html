@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Mijn Portaal</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- BOVENSTE MENU -->
+    <header>
+        <h1>🎓 Mijn Portaal</h1>
+
+        <button onclick="openSettings()">
+            ⚙️ Instellingen
+        </button>
+    </header>
+
+
+    <!-- HOOFDGEDEELTE -->
+    <main>
+
+        <!-- WELKOM -->
+        <section class="welkom">
+
+            <h2>Hallo! 👋</h2>
+
+            <p>
+                Welkom bij jouw persoonlijke schoolportaal!
+            </p>
+
+            <div id="school-status" class="school-status">
+                📚 Even kijken...
+            </div>
+
+        </section>
+
+
+        <!-- LESSEN -->
+        <section>
+
+            <div class="section-title">
+
+                <h2>📚 Mijn lessen</h2>
+
+                <button onclick="voegLesToe()">
+                    + Les toevoegen
+                </button>
+
+            </div>
+
+            <div id="lessen">
+                <p class="leeg">
+                    Nog geen lessen toegevoegd.
+                </p>
+            </div>
+
+        </section>
+
+
+        <!-- TAKEN -->
+        <section>
+
+            <div class="section-title">
+
+                <h2>✏️ Mijn taken</h2>
+
+                <button onclick="voegTaakToe()">
+                    + Taak toevoegen
+                </button>
+
+            </div>
+
+            <div id="taken">
+                <p class="leeg">
+                    Nog geen taken toegevoegd.
+                </p>
+            </div>
+
+        </section>
+
+
+        <!-- DOELEN -->
+        <section>
+
+            <div class="section-title">
+
+                <h2>🎯 Mijn doelen</h2>
+
+                <button onclick="voegDoelToe()">
+                    + Doel toevoegen
+                </button>
+
+            </div>
+
+            <div id="doelen">
+                <p class="leeg">
+                    Nog geen doelen toegevoegd.
+                </p>
+            </div>
+
+        </section>
+
+
+        <!-- SCHOOLKALENDER -->
+        <section>
+
+            <h2>📅 Schoolkalender 2026-2027</h2>
+
+
+            <div class="kalender-item">
+
+                <strong>
+                    🍂 Herfstvakantie
+                </strong>
+
+                <p>
+                    2 november t/m 7 november 2026
+                </p>
+
+            </div>
+
+
+            <div class="kalender-item">
+
+                <strong>
+                    🕊️ Wapenstilstand
+                </strong>
+
+                <p>
+                    11 november 2026
+                </p>
+
+            </div>
+
+
+            <div class="kalender-item">
+
+                <strong>
+                    🎄 Kerstvakantie
+                </strong>
+
+                <p>
+                    21 december 2026 t/m 3 januari 2027
+                </p>
+
+            </div>
+
+
+            <div class="kalender-item">
+
+                <strong>
+                    🌷 Krokusvakantie
+                </strong>
+
+                <p>
+                    8 februari t/m 14 februari 2027
+                </p>
+
+            </div>
+
+
+            <div class="kalender-item">
+
+                <strong>
+                    🐣 Paasvakantie
+                </strong>
+
+                <p>
+                    29 maart t/m 11 april 2027
+                </p>
+
+            </div>
+
+
+            <div class="kalender-item">
+
+                <strong>
+                    🧑‍🏫 Pedagogische studiedag
+                </strong>
+
+                <p>
+                    21 april 2027
+                </p>
+
+            </div>
+
+
+            <div class="kalender-item">
+
+                <strong>
+                    🇧🇪 Hemelvaartsdag
+                </strong>
+
+                <p>
+                    6 mei 2027
+                </p>
+
+            </div>
+
+
+            <div class="kalender-item">
+
+                <strong>
+                    🌉 Brugdag
+                </strong>
+
+                <p>
+                    7 mei 2027
+                </p>
+
+            </div>
+
+
+            <div class="kalender-item">
+
+                <strong>
+                    🕊️ Pinkstermaandag
+                </strong>
+
+                <p>
+                    17 mei 2027
+                </p>
+
+            </div>
+
+
+            <div class="kalender-item">
+
+                <strong>
+                    ☀️ Einde schooljaar
+                </strong>
+
+                <p>
+                    30 juni 2027
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- INSTELLINGEN -->
+    <div id="settings" class="popup">
+
+        <div class="popup-content">
+
+            <button
+                class="close"
+                onclick="closeSettings()">
+                ✖
+            </button>
+
+
+            <h2>
+                ⚙️ Instellingen
+            </h2>
+
+
+            <!-- ACHTERGRONDKLEUR -->
+
+            <label for="achtergrond">
+                🎨 Achtergrondkleur
+            </label>
+
+            <input
+                type="color"
+                id="achtergrond"
+                value="#eef4ff"
+                onchange="veranderAchtergrond()"
+            >
+
+
+            <!-- MENU KLEUR -->
+
+            <label for="menuKleur">
+                🖌️ Kleur van de menu's
+            </label>
+
+            <input
+                type="color"
+                id="menuKleur"
+                value="#ffffff"
+                onchange="veranderMenuKleur()"
+            >
+
+
+            <!-- RESET -->
+
+            <button
+                class="reset-button"
+                onclick="resetKleuren()">
+
+                🔄 Kleuren resetten
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- JAVASCRIPT -->
+
+    <script src="script.js"></script>
+
+</body>
+</html>
