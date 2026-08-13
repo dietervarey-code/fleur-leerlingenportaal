@@ -62,12 +62,34 @@
         </section>
 
 
-        <!-- TAKEN -->
+        <!-- HOBBY'S -->
         <section>
 
             <div class="section-title">
 
-                <h2>✏️ Mijn taken</h2>
+                <h2>🎮 Mijn hobby's</h2>
+
+                <button onclick="voegHobbyToe()">
+                    + Hobby toevoegen
+                </button>
+
+            </div>
+
+            <div id="hobbies">
+                <p class="leeg">
+                    Nog geen hobby's toegevoegd.
+                </p>
+            </div>
+
+        </section>
+
+
+        <!-- PLANNING (taken + hobby-blokken gecombineerd) -->
+        <section>
+
+            <div class="section-title">
+
+                <h2>📋 Mijn planning</h2>
 
                 <button onclick="voegTaakToe()">
                     + Taak toevoegen
@@ -77,7 +99,7 @@
 
             <div id="taken">
                 <p class="leeg">
-                    Nog geen taken toegevoegd.
+                    Nog geen taken of hobby's toegevoegd.
                 </p>
             </div>
 
@@ -244,6 +266,110 @@
         </section>
 
     </main>
+
+
+    <!-- HOBBY TOEVOEGEN POPUP -->
+    <div id="hobby-popup" class="popup">
+
+        <div class="popup-content">
+
+            <button
+                class="close"
+                onclick="sluitHobbyPopup()">
+                ✖
+            </button>
+
+            <h2>🎮 Hobby toevoegen</h2>
+
+
+            <!-- ICOON -->
+
+            <label>Kies een icoontje</label>
+
+            <div class="icoon-kiezer" id="hobby-icoon-kiezer">
+                <button type="button" class="icoon-optie" onclick="kiesHobbyIcono('⚽')">⚽</button>
+                <button type="button" class="icoon-optie" onclick="kiesHobbyIcono('🏀')">🏀</button>
+                <button type="button" class="icoon-optie" onclick="kiesHobbyIcono('🎵')">🎵</button>
+                <button type="button" class="icoon-optie" onclick="kiesHobbyIcono('🎨')">🎨</button>
+                <button type="button" class="icoon-optie" onclick="kiesHobbyIcono('🏃')">🏃</button>
+                <button type="button" class="icoon-optie" onclick="kiesHobbyIcono('🚴')">🚴</button>
+                <button type="button" class="icoon-optie" onclick="kiesHobbyIcono('🏊')">🏊</button>
+                <button type="button" class="icoon-optie" onclick="kiesHobbyIcono('🎾')">🎾</button>
+                <button type="button" class="icoon-optie" onclick="kiesHobbyIcono('🎭')">🎭</button>
+                <button type="button" class="icoon-optie" onclick="kiesHobbyIcono('🎮')">🎮</button>
+                <button type="button" class="icoon-optie" onclick="kiesHobbyIcono('🐴')">🐴</button>
+                <button type="button" class="icoon-optie" onclick="kiesHobbyIcono('💃')">💃</button>
+                <button type="button" class="icoon-optie" onclick="kiesHobbyIcono('🎯')">🎯</button>
+                <button type="button" class="icoon-optie" onclick="kiesHobbyIcono('🏋️')">🏋️</button>
+                <button type="button" class="icoon-optie" onclick="kiesHobbyIcono('⭐')">⭐</button>
+            </div>
+
+
+            <!-- NAAM -->
+
+            <label for="hobby-naam">Naam van de hobby</label>
+
+            <input
+                type="text"
+                id="hobby-naam"
+                class="tekst-invoer"
+                placeholder="bv. Voetbaltraining"
+            >
+
+
+            <!-- DAG -->
+
+            <label>Dag van de week</label>
+
+            <div class="dag-kiezer">
+                <button type="button" class="dag-chip" data-dag="1" onclick="kiesDag(1)">Ma</button>
+                <button type="button" class="dag-chip" data-dag="2" onclick="kiesDag(2)">Di</button>
+                <button type="button" class="dag-chip" data-dag="3" onclick="kiesDag(3)">Wo</button>
+                <button type="button" class="dag-chip" data-dag="4" onclick="kiesDag(4)">Do</button>
+                <button type="button" class="dag-chip" data-dag="5" onclick="kiesDag(5)">Vr</button>
+                <button type="button" class="dag-chip" data-dag="6" onclick="kiesDag(6)">Za</button>
+                <button type="button" class="dag-chip" data-dag="0" onclick="kiesDag(0)">Zo</button>
+            </div>
+
+
+            <!-- TIJDSLOT -->
+
+            <div class="tijd-invoer-rij">
+
+                <div class="tijd-invoer-groep">
+                    <label for="hobby-van">Van</label>
+                    <input
+                        type="time"
+                        id="hobby-van"
+                        class="tekst-invoer tijd-invoer"
+                        value="14:00"
+                    >
+                </div>
+
+                <span class="tijd-tot-label">tot</span>
+
+                <div class="tijd-invoer-groep">
+                    <label for="hobby-tot">Tot</label>
+                    <input
+                        type="time"
+                        id="hobby-tot"
+                        class="tekst-invoer tijd-invoer"
+                        value="16:00"
+                    >
+                </div>
+
+            </div>
+
+
+            <button
+                class="reset-button"
+                onclick="bevestigHobby()">
+                + Toevoegen
+            </button>
+
+        </div>
+
+    </div>
 
 
     <!-- TAAK TOEVOEGEN POPUP -->

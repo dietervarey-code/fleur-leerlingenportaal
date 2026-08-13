@@ -1227,6 +1227,367 @@ section {
 
 
 /* ========================================
+   HOBBY-BLOK (in planning)
+======================================== */
+
+.hobby-blok {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    padding:
+        12px 14px;
+
+    margin-top:
+        10px;
+
+    border-radius:
+        14px;
+
+    background-color:
+        #e8f5e9;
+
+    border-left:
+        4px solid
+        #66bb6a;
+
+    gap:
+        10px;
+
+}
+
+
+.hobby-blok-info {
+
+    flex:
+        1;
+
+}
+
+
+.hobby-blok-naam {
+
+    font-weight:
+        bold;
+
+    font-size:
+        15px;
+
+}
+
+
+.hobby-blok-tijd {
+
+    font-size:
+        13px;
+
+    opacity:
+        0.65;
+
+    margin-top:
+        3px;
+
+}
+
+
+.hobby-blok-overslaan {
+
+    background:
+        transparent;
+
+    border:
+        none;
+
+    color:
+        #888;
+
+    font-size:
+        16px;
+
+    cursor:
+        pointer;
+
+    padding:
+        4px 6px;
+
+    border-radius:
+        50%;
+
+    line-height:
+        1;
+
+    flex-shrink:
+        0;
+
+    transition:
+        background 0.15s,
+        color 0.15s;
+
+}
+
+.hobby-blok-overslaan:hover {
+
+    background:
+        #ffcdd2;
+
+    color:
+        #c62828;
+
+}
+
+
+/* ========================================
+   HOBBY BEHEER (beheersectie)
+======================================== */
+
+.hobby-rij {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    padding:
+        14px;
+
+    margin-top:
+        10px;
+
+    border-radius:
+        14px;
+
+    background-color:
+        rgba(0, 0, 0, 0.04);
+
+    gap:
+        10px;
+
+}
+
+
+.hobby-rij-info {
+
+    flex:
+        1;
+
+}
+
+
+.hobby-rij-naam {
+
+    font-weight:
+        bold;
+
+    font-size:
+        15px;
+
+}
+
+
+.hobby-rij-schema {
+
+    font-size:
+        13px;
+
+    opacity:
+        0.65;
+
+    margin-top:
+        3px;
+
+}
+
+
+.hobby-rij-acties {
+
+    display:
+        flex;
+
+    gap:
+        8px;
+
+    align-items:
+        center;
+
+    flex-shrink:
+        0;
+
+}
+
+
+.hobby-week-knop {
+
+    font-size:
+        12px;
+
+    padding:
+        6px 10px;
+
+    border-radius:
+        8px;
+
+    background-color:
+        rgba(0, 0, 0, 0.07);
+
+    white-space:
+        nowrap;
+
+}
+
+
+.hobby-week-knop.herstel {
+
+    background-color:
+        #dce8ff;
+
+}
+
+
+.hobby-rij.overgeslagen {
+
+    opacity:
+        0.5;
+
+}
+
+
+/* ========================================
+   DAG KIEZER
+======================================== */
+
+.dag-kiezer {
+
+    display:
+        flex;
+
+    gap:
+        6px;
+
+    margin-top:
+        12px;
+
+    flex-wrap:
+        wrap;
+
+}
+
+
+.dag-chip {
+
+    padding:
+        8px 11px;
+
+    border-radius:
+        10px;
+
+    background-color:
+        rgba(0, 0, 0, 0.04);
+
+    border:
+        2px solid transparent;
+
+    font-size:
+        14px;
+
+    font-weight:
+        bold;
+
+    transition:
+        all 0.15s ease;
+
+}
+
+
+.dag-chip.geselecteerd {
+
+    background-color:
+        #dce8ff;
+
+    border-color:
+        #7aadff;
+
+}
+
+
+/* ========================================
+   TIJDSLOT INVOER
+======================================== */
+
+.tijd-invoer-rij {
+
+    display:
+        flex;
+
+    align-items:
+        flex-end;
+
+    gap:
+        12px;
+
+    margin-top:
+        16px;
+
+    flex-wrap:
+        wrap;
+
+}
+
+
+.tijd-invoer-groep {
+
+    flex:
+        1;
+
+    min-width:
+        100px;
+
+}
+
+
+.tijd-invoer-groep label {
+
+    margin-top:
+        0;
+
+    font-size:
+        13px;
+
+}
+
+
+.tijd-invoer {
+
+    width:
+        100%;
+
+}
+
+
+.tijd-tot-label {
+
+    padding-bottom:
+        10px;
+
+    opacity:
+        0.55;
+
+    font-size:
+        14px;
+
+}
+
+
+/* ========================================
    TELEFOON
 ======================================== */
 

@@ -1489,6 +1489,13 @@ function toonHobbyBlok(lijst, hobby, datumStr) {
 
             </div>
 
+            <button
+                class="hobby-blok-overslaan"
+                onclick="slaanOver(${hobby.id})"
+                title="Niet deze week">
+                ✕
+            </button>
+
         </div>
 
     `;
