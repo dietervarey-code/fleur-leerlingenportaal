@@ -644,6 +644,95 @@ section {
 
 
 /* ========================================
+   DATUM INVOER
+======================================== */
+
+.datum-invoer {
+
+    cursor:
+        pointer;
+
+}
+
+
+/* ========================================
+   DEADLINE BADGE
+======================================== */
+
+.deadline-badge {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    gap:
+        4px;
+
+    font-size:
+        12px;
+
+    font-weight:
+        bold;
+
+    padding:
+        3px 10px;
+
+    border-radius:
+        20px;
+
+    margin-top:
+        6px;
+
+}
+
+
+.deadline-badge.toekomst {
+
+    background-color:
+        #e8f4fd;
+
+    color:
+        #2980b9;
+
+}
+
+
+.deadline-badge.morgen {
+
+    background-color:
+        #fef9e7;
+
+    color:
+        #d68910;
+
+}
+
+
+.deadline-badge.vandaag {
+
+    background-color:
+        #fdebd0;
+
+    color:
+        #ca6f1e;
+
+}
+
+
+.deadline-badge.verstreken {
+
+    background-color:
+        #fadbd8;
+
+    color:
+        #c0392b;
+
+}
+
+
+/* ========================================
    TIJDSINSCHATTING
 ======================================== */
 

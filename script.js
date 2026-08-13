@@ -650,6 +650,16 @@ function voegTaakToe() {
     ).value = "";
 
 
+    // Standaard: morgen als deadline
+    const morgen = new Date();
+    morgen.setDate(morgen.getDate() + 1);
+
+    document.getElementById(
+        "taak-deadline"
+    ).value =
+        `${morgen.getFullYear()}-${String(morgen.getMonth() + 1).padStart(2, "0")}-${String(morgen.getDate()).padStart(2, "0")}`;
+
+
     vulVakKiezer();
 
     document.getElementById(
@@ -944,10 +954,17 @@ function bevestigTaak() {
     }
 
 
+    const deadlineWaarde =
+        document.getElementById(
+            "taak-deadline"
+        ).value || null;
+
+
     taken.push({
         vak: geselecteerdVak,
         naam: taakNaam,
         klaar: false,
+        deadline: deadlineWaarde,
         schatting: schattingMinuten,
         looptijd: 0,
         loopStatus: "gestopt",
@@ -973,6 +990,61 @@ function sluitTaakPopup() {
     document.getElementById(
         "taak-popup"
     ).style.display = "none";
+
+}
+
+
+/* --- Deadline hulpfuncties --- */
+
+function deadlineKlasse(dateString) {
+
+    if (!dateString) return null;
+
+    const v = new Date();
+
+    const vandaagStr =
+        `${v.getFullYear()}-${String(v.getMonth() + 1).padStart(2, "0")}-${String(v.getDate()).padStart(2, "0")}`;
+
+    const m = new Date(v);
+    m.setDate(m.getDate() + 1);
+
+    const morgenStr =
+        `${m.getFullYear()}-${String(m.getMonth() + 1).padStart(2, "0")}-${String(m.getDate()).padStart(2, "0")}`;
+
+
+    if (dateString < vandaagStr) return "verstreken";
+    if (dateString === vandaagStr) return "vandaag";
+    if (dateString === morgenStr) return "morgen";
+    return "toekomst";
+
+}
+
+
+function deadlineTekst(dateString, klasse) {
+
+    if (!dateString) return "";
+
+    const [j, ma, d] =
+        dateString.split("-").map(Number);
+
+    const datum =
+        new Date(j, ma - 1, d);
+
+    const tekst =
+        datum.toLocaleDateString("nl-BE", {
+            weekday: "short",
+            day: "numeric",
+            month: "short"
+        });
+
+    const iconen = {
+        verstreken: "❗",
+        vandaag:    "🔥",
+        morgen:     "⚡",
+        toekomst:   "📅"
+    };
+
+    return `<span class="deadline-badge ${klasse}">${iconen[klasse]} ${tekst}</span>`;
 
 }
 
@@ -1015,6 +1087,14 @@ function toonTaken() {
         const vakLabel =
             vak
                 ? `<span class="taak-vak">${vak.icoon} ${vak.naam}</span>`
+                : "";
+
+        const dlKlasse =
+            deadlineKlasse(taak.deadline || null);
+
+        const deadlineBadge =
+            dlKlasse
+                ? deadlineTekst(taak.deadline, dlKlasse)
                 : "";
 
         const schatting =
@@ -1156,6 +1236,7 @@ function toonTaken() {
 
                 </div>
 
+                ${deadlineBadge}
 
                 <div class="taak-timer">
 
