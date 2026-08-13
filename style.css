@@ -822,36 +822,6 @@ section {
 
 
 /* ========================================
-   DOELEN
-======================================== */
-
-.doel {
-
-    display:
-        flex;
-
-    justify-content:
-        space-between;
-
-    align-items:
-        center;
-
-    padding:
-        14px;
-
-    margin-top:
-        10px;
-
-    border-radius:
-        14px;
-
-    background-color:
-        rgba(0, 0, 0, 0.04);
-
-}
-
-
-/* ========================================
    VERWIJDER KNOP
 ======================================== */
 

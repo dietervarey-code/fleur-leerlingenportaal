@@ -1884,123 +1884,6 @@ function verwijderTaak(index) {
 
 
 /* ========================================
-   DOELEN
-======================================== */
-
-let doelen =
-    JSON.parse(
-        localStorage.getItem("doelen")
-    ) || [];
-
-
-function voegDoelToe() {
-
-    const doel =
-        prompt(
-            "Welk doel wil je toevoegen?"
-        );
-
-
-    if (
-        doel !== null &&
-        doel.trim() !== ""
-    ) {
-
-        doelen.push(
-            doel.trim()
-        );
-
-
-        localStorage.setItem(
-            "doelen",
-            JSON.stringify(doelen)
-        );
-
-
-        toonDoelen();
-
-    }
-
-}
-
-
-function toonDoelen() {
-
-    const lijst =
-        document.getElementById(
-            "doelen"
-        );
-
-
-    if (!lijst) {
-        return;
-    }
-
-
-    lijst.innerHTML = "";
-
-
-    if (doelen.length === 0) {
-
-        lijst.innerHTML =
-            `<p class="leeg">
-                Nog geen doelen toegevoegd.
-            </p>`;
-
-        return;
-
-    }
-
-
-    doelen.forEach(
-        function(doel, index) {
-
-            lijst.innerHTML += `
-
-                <div class="doel">
-
-                    <span>
-                        🎯 ${doel}
-                    </span>
-
-                    <button
-                        class="verwijder"
-                        onclick="verwijderDoel(${index})">
-
-                        🗑️
-
-                    </button>
-
-                </div>
-
-            `;
-
-        }
-    );
-
-}
-
-
-function verwijderDoel(index) {
-
-    doelen.splice(
-        index,
-        1
-    );
-
-
-    localStorage.setItem(
-        "doelen",
-        JSON.stringify(doelen)
-    );
-
-
-    toonDoelen();
-
-}
-
-
-/* ========================================
    KLEUREN HULPFUNCTIE
 ======================================== */
 
@@ -2184,8 +2067,6 @@ window.onload =
         toonHobbies();
 
         toonTaken();
-
-        toonDoelen();
 
         laadKleuren();
 
