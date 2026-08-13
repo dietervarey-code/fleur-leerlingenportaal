@@ -417,6 +417,46 @@
             </h2>
 
 
+            <!-- AANMELDEN -->
+
+            <label>☁️ Aanmelden voor synchronisatie</label>
+
+            <p class="sync-uitleg">
+                Meld je aan met je Google-account om jouw gegevens automatisch
+                op te slaan en te synchroniseren tussen telefoon en computer.
+            </p>
+
+            <div id="login-afgesloten">
+
+                <button
+                    class="google-knop"
+                    onclick="aanmelden()">
+                    🔐 Aanmelden met Google
+                </button>
+
+            </div>
+
+            <div id="login-aangemeld" style="display:none">
+
+                <div class="login-info">
+
+                    <span id="login-naam"></span>
+
+                    <button
+                        class="afmeld-knop"
+                        onclick="afmelden()">
+                        Afmelden
+                    </button>
+
+                </div>
+
+            </div>
+
+            <div id="sync-status" class="sync-status"></div>
+
+            <hr class="instellingen-scheiding">
+
+
             <!-- ACHTERGRONDKLEUR -->
 
             <label>🎨 Achtergrondkleur</label>
@@ -480,8 +520,13 @@
     </div>
 
 
-    <!-- JAVASCRIPT -->
+    <!-- FIREBASE SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="firebase-config.js"></script>
 
+    <!-- JAVASCRIPT -->
     <script src="script.js"></script>
 
 </body>

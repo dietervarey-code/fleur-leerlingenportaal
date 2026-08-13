@@ -2054,6 +2054,300 @@ function laadKleuren() {
 
 
 /* ========================================
+   FIREBASE SYNC MET GOOGLE LOGIN
+======================================== */
+
+let db          = null;
+let auth        = null;
+let currentUser = null;
+let _syncTimeout      = null;
+let _isLadenVanCloud  = false;
+
+
+// Intercept localStorage.setItem voor automatische cloud-sync
+const _origSetItem = localStorage.setItem.bind(localStorage);
+
+localStorage.setItem = function(sleutel, waarde) {
+
+    _origSetItem(sleutel, waarde);
+
+    if (!_isLadenVanCloud && currentUser) {
+
+        const syncSleutels = [
+            "lessen", "taken", "hobbies",
+            "overgeslagen", "achtergrond", "menuKleur"
+        ];
+
+        if (syncSleutels.includes(sleutel)) {
+            syncNaarCloud();
+        }
+
+    }
+
+};
+
+
+function initFirebase() {
+
+    if (
+        !window.firebaseConfig ||
+        firebaseConfig.apiKey === "VERVANG-MET-JOUW-API-KEY"
+    ) {
+        return; // Nog niet geconfigureerd
+    }
+
+    try {
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        db   = firebase.firestore();
+        auth = firebase.auth();
+
+
+        // Luister naar login/logout
+        auth.onAuthStateChanged(function(user) {
+
+            currentUser = user;
+
+            toonAanmeldStatus(user);
+
+            if (user) {
+
+                // Gegevens laden vanuit cloud
+                laadVanCloud(function() {
+                    toonLessen();
+                    toonHobbies();
+                    toonTaken();
+                    laadKleuren();
+
+                    const heeftLopende =
+                        taken.some(function(t) {
+                            return t.loopStatus === "bezig";
+                        });
+
+                    if (heeftLopende && !timerInterval) {
+                        timerInterval =
+                            setInterval(updateTimerDisplays, 1000);
+                    }
+                });
+
+            }
+
+        });
+
+    } catch (e) {
+        console.error("Firebase fout:", e);
+    }
+
+}
+
+
+function aanmelden() {
+
+    if (!auth) {
+        toonSyncStatus(
+            "⚠ Firebase nog niet geconfigureerd",
+            "#e74c3c"
+        );
+        return;
+    }
+
+    const provider =
+        new firebase.auth.GoogleAuthProvider();
+
+    auth.signInWithPopup(provider)
+        .catch(function(err) {
+            toonSyncStatus("⚠ Aanmelden mislukt", "#e74c3c");
+            console.error(err);
+        });
+
+}
+
+
+function afmelden() {
+
+    if (auth) {
+        auth.signOut();
+    }
+
+}
+
+
+function getDocRef() {
+
+    if (!db || !currentUser) return null;
+
+    return db
+        .collection("portalen")
+        .doc(currentUser.uid);
+
+}
+
+
+function syncNaarCloud() {
+
+    const ref = getDocRef();
+    if (!ref) return;
+
+    clearTimeout(_syncTimeout);
+
+    _syncTimeout = setTimeout(function() {
+
+        const data = {
+            lessen:       JSON.parse(localStorage.getItem("lessen")       || "[]"),
+            taken:        JSON.parse(localStorage.getItem("taken")        || "[]"),
+            hobbies:      JSON.parse(localStorage.getItem("hobbies")      || "[]"),
+            overgeslagen: JSON.parse(localStorage.getItem("overgeslagen") || '{"week":"","ids":[]}'),
+            achtergrond:  localStorage.getItem("achtergrond")  || "#eef4ff",
+            menuKleur:    localStorage.getItem("menuKleur")    || "#ffffff",
+            bijgewerkt:   new Date().toISOString()
+        };
+
+        ref.set(data)
+            .then(function() {
+                toonSyncStatus("✓ Opgeslagen in cloud", "#27ae60");
+            })
+            .catch(function(err) {
+                toonSyncStatus("⚠ Sync mislukt", "#e74c3c");
+                console.error(err);
+            });
+
+    }, 800);
+
+}
+
+
+function laadVanCloud(callback) {
+
+    const ref = getDocRef();
+
+    if (!ref) {
+        callback && callback();
+        return;
+    }
+
+    toonSyncStatus("⏳ Gegevens laden…", "#f39c12");
+
+    ref.get()
+        .then(function(doc) {
+
+            if (doc.exists) {
+
+                pasCloudDataToe(doc.data());
+                toonSyncStatus("✓ Gesynchroniseerd", "#27ae60");
+
+            } else {
+
+                // Eerste keer aanmelden: sla lokale data op
+                syncNaarCloud();
+                toonSyncStatus("✓ Profiel aangemaakt", "#27ae60");
+
+            }
+
+            callback && callback();
+
+        })
+        .catch(function(err) {
+            toonSyncStatus("⚠ Kan niet verbinden", "#e74c3c");
+            console.error(err);
+            callback && callback();
+        });
+
+}
+
+
+function pasCloudDataToe(data) {
+
+    _isLadenVanCloud = true;
+
+    if (Array.isArray(data.lessen)) {
+        lessen = data.lessen;
+        _origSetItem("lessen", JSON.stringify(lessen));
+    }
+
+    if (Array.isArray(data.taken)) {
+        taken = data.taken;
+        _origSetItem("taken", JSON.stringify(taken));
+    }
+
+    if (Array.isArray(data.hobbies)) {
+        hobbies = data.hobbies;
+        _origSetItem("hobbies", JSON.stringify(hobbies));
+    }
+
+    if (data.overgeslagen) {
+        _origSetItem(
+            "overgeslagen",
+            JSON.stringify(data.overgeslagen)
+        );
+    }
+
+    if (data.achtergrond) {
+        _origSetItem("achtergrond", data.achtergrond);
+    }
+
+    if (data.menuKleur) {
+        _origSetItem("menuKleur", data.menuKleur);
+    }
+
+    _isLadenVanCloud = false;
+
+}
+
+
+function toonAanmeldStatus(user) {
+
+    const afgesloten =
+        document.getElementById("login-afgesloten");
+
+    const aangemeld =
+        document.getElementById("login-aangemeld");
+
+    const naamEl =
+        document.getElementById("login-naam");
+
+
+    if (user) {
+
+        if (afgesloten) afgesloten.style.display = "none";
+        if (aangemeld)  aangemeld.style.display  = "block";
+        if (naamEl)     naamEl.textContent =
+            user.displayName || user.email;
+
+    } else {
+
+        if (afgesloten) afgesloten.style.display = "block";
+        if (aangemeld)  aangemeld.style.display  = "none";
+
+    }
+
+}
+
+
+function toonSyncStatus(tekst, kleur) {
+
+    const el =
+        document.getElementById("sync-status");
+
+    if (!el) return;
+
+    el.textContent = tekst;
+    el.style.color = kleur;
+
+    clearTimeout(el._timer);
+
+    el._timer = setTimeout(function() {
+        if (el.textContent === tekst) {
+            el.textContent = "";
+        }
+    }, 5000);
+
+}
+
+
+/* ========================================
    SCHOOLKALENDER
 ======================================== */
 
@@ -2230,14 +2524,14 @@ window.onload =
 
         toonSchoolStatus();
 
+        // Firebase starten (laadt cloud-data via onAuthStateChanged)
+        initFirebase();
+
+        // Eerste render met lokale data (direct zichtbaar)
         toonLessen();
-
         toonHobbies();
-
         toonTaken();
-
         toonKalender();
-
         laadKleuren();
 
 
