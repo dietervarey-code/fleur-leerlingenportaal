@@ -263,15 +263,6 @@ section {
 
 .taak {
 
-    display:
-        flex;
-
-    justify-content:
-        space-between;
-
-    align-items:
-        center;
-
     padding:
         14px;
 
@@ -287,15 +278,47 @@ section {
 }
 
 
-.taak label {
+.taak-top {
 
-    cursor:
-        pointer;
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        flex-start;
+
+    gap:
+        10px;
 
 }
 
 
-.taak input {
+.taak-top label {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        8px;
+
+    cursor:
+        pointer;
+
+    flex:
+        1;
+
+    flex-wrap:
+        wrap;
+
+}
+
+
+.taak-top input[type="checkbox"] {
 
     width:
         18px;
@@ -303,16 +326,408 @@ section {
     height:
         18px;
 
+    flex-shrink:
+        0;
+
 }
 
 
-.klaar {
+.taak-vak {
+
+    font-size:
+        13px;
+
+    background:
+        rgba(0, 0, 0, 0.07);
+
+    padding:
+        3px 10px;
+
+    border-radius:
+        20px;
+
+    white-space:
+        nowrap;
+
+}
+
+
+.klaar .taak-top label {
 
     text-decoration:
         line-through;
 
     opacity:
         0.55;
+
+}
+
+
+/* ========================================
+   TIMER
+======================================== */
+
+.taak-timer {
+
+    margin-top:
+        12px;
+
+    padding-top:
+        12px;
+
+    border-top:
+        1px solid
+        rgba(0, 0, 0, 0.07);
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        10px;
+
+}
+
+
+.timer-info {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        12px;
+
+    flex-wrap:
+        wrap;
+
+}
+
+
+.taak-schatting {
+
+    font-size:
+        13px;
+
+    opacity:
+        0.7;
+
+}
+
+
+.timer-display {
+
+    font-size:
+        22px;
+
+    font-weight:
+        bold;
+
+    font-family:
+        monospace;
+
+    letter-spacing:
+        1px;
+
+}
+
+
+.timer-knoppen {
+
+    display:
+        flex;
+
+    gap:
+        6px;
+
+}
+
+
+.timer-knop {
+
+    padding:
+        7px 12px;
+
+    font-size:
+        13px;
+
+    border-radius:
+        10px;
+
+}
+
+
+.timer-knop.start {
+
+    background-color:
+        #d4f5dd;
+
+}
+
+
+.timer-knop.pauze {
+
+    background-color:
+        #fff3cd;
+
+}
+
+
+.timer-knop.stop {
+
+    background-color:
+        #ffdede;
+
+}
+
+
+.timer-knop.reset {
+
+    background-color:
+        rgba(0, 0, 0, 0.06);
+
+    font-size:
+        16px;
+
+    padding:
+        7px 10px;
+
+}
+
+
+.te-lang {
+
+    font-size:
+        13px;
+
+    color:
+        #c0392b;
+
+    font-weight:
+        bold;
+
+}
+
+
+.op-tijd {
+
+    font-size:
+        13px;
+
+    color:
+        #27ae60;
+
+    font-weight:
+        bold;
+
+}
+
+
+/* ========================================
+   VAK KIEZER IN POPUP
+======================================== */
+
+.vak-kiezer {
+
+    display:
+        flex;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        8px;
+
+    margin-top:
+        12px;
+
+}
+
+
+.vak-chip {
+
+    padding:
+        8px 14px;
+
+    background:
+        rgba(0, 0, 0, 0.04);
+
+    border-radius:
+        20px;
+
+    border:
+        2px solid transparent;
+
+    cursor:
+        pointer;
+
+    font-size:
+        14px;
+
+    transition:
+        all 0.15s ease;
+
+}
+
+
+.vak-chip:hover {
+
+    background:
+        rgba(0, 0, 0, 0.08);
+
+}
+
+
+.vak-chip.geselecteerd {
+
+    background:
+        #dce8ff;
+
+    border-color:
+        #7aadff;
+
+}
+
+
+.vak-chip.nieuw-vak {
+
+    border:
+        2px dashed
+        rgba(0, 0, 0, 0.25);
+
+    background:
+        transparent;
+
+}
+
+
+/* ========================================
+   NIEUW VAK SECTIE
+======================================== */
+
+.nieuw-vak-sectie {
+
+    display:
+        none;
+
+    margin-top:
+        16px;
+
+    padding:
+        14px;
+
+    background:
+        rgba(0, 0, 0, 0.03);
+
+    border-radius:
+        14px;
+
+}
+
+
+.nieuw-vak-sectie label {
+
+    margin-top:
+        0;
+
+}
+
+
+/* ========================================
+   TIJDSINSCHATTING
+======================================== */
+
+.schatting-invoer {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        16px;
+
+    margin-top:
+        12px;
+
+}
+
+
+.schatting-invoer button {
+
+    width:
+        40px;
+
+    height:
+        40px;
+
+    border-radius:
+        50%;
+
+    padding:
+        0;
+
+    font-size:
+        22px;
+
+    background-color:
+        #dce8ff;
+
+    flex-shrink:
+        0;
+
+}
+
+
+.schatting-midden {
+
+    display:
+        flex;
+
+    align-items:
+        baseline;
+
+    gap:
+        6px;
+
+}
+
+
+#schatting-waarde {
+
+    font-size:
+        28px;
+
+    font-weight:
+        bold;
+
+    min-width:
+        40px;
+
+    text-align:
+        center;
+
+}
+
+
+.schatting-eenheid {
+
+    font-size:
+        16px;
+
+    opacity:
+        0.6;
 
 }
 
@@ -460,6 +875,12 @@ section {
 
     max-width:
         420px;
+
+    max-height:
+        90vh;
+
+    overflow-y:
+        auto;
 
     position:
         relative;

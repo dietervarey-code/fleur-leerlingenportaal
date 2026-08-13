@@ -246,6 +246,113 @@
     </main>
 
 
+    <!-- TAAK TOEVOEGEN POPUP -->
+    <div id="taak-popup" class="popup">
+
+        <div class="popup-content">
+
+            <button
+                class="close"
+                onclick="sluitTaakPopup()">
+                ✖
+            </button>
+
+            <h2>✏️ Taak toevoegen</h2>
+
+
+            <!-- VAK KIEZEN -->
+
+            <label>Kies een vak</label>
+
+            <div class="vak-kiezer" id="vak-kiezer">
+                <!-- gevuld door JavaScript -->
+            </div>
+
+
+            <!-- NIEUW VAK AANMAKEN -->
+
+            <div id="nieuw-vak-sectie" class="nieuw-vak-sectie">
+
+                <label>Icoontje voor het nieuwe vak</label>
+
+                <div class="icoon-kiezer" id="nieuw-vak-icoon-kiezer">
+                    <button type="button" class="icoon-optie" onclick="kiesNieuwVakIcono('📖')">📖</button>
+                    <button type="button" class="icoon-optie" onclick="kiesNieuwVakIcono('🔢')">🔢</button>
+                    <button type="button" class="icoon-optie" onclick="kiesNieuwVakIcono('📐')">📐</button>
+                    <button type="button" class="icoon-optie" onclick="kiesNieuwVakIcono('✏️')">✏️</button>
+                    <button type="button" class="icoon-optie" onclick="kiesNieuwVakIcono('🌍')">🌍</button>
+                    <button type="button" class="icoon-optie" onclick="kiesNieuwVakIcono('🌿')">🌿</button>
+                    <button type="button" class="icoon-optie" onclick="kiesNieuwVakIcono('🔬')">🔬</button>
+                    <button type="button" class="icoon-optie" onclick="kiesNieuwVakIcono('🎨')">🎨</button>
+                    <button type="button" class="icoon-optie" onclick="kiesNieuwVakIcono('🎵')">🎵</button>
+                    <button type="button" class="icoon-optie" onclick="kiesNieuwVakIcono('🏃')">🏃</button>
+                    <button type="button" class="icoon-optie" onclick="kiesNieuwVakIcono('💻')">💻</button>
+                    <button type="button" class="icoon-optie" onclick="kiesNieuwVakIcono('🗣️')">🗣️</button>
+                    <button type="button" class="icoon-optie" onclick="kiesNieuwVakIcono('📜')">📜</button>
+                    <button type="button" class="icoon-optie" onclick="kiesNieuwVakIcono('🧮')">🧮</button>
+                    <button type="button" class="icoon-optie" onclick="kiesNieuwVakIcono('⭐')">⭐</button>
+                </div>
+
+                <input
+                    type="text"
+                    id="nieuw-vak-naam"
+                    class="tekst-invoer"
+                    placeholder="bv. Aardrijkskunde"
+                >
+
+            </div>
+
+
+            <!-- TAAK NAAM -->
+
+            <label for="taak-naam">Naam van de taak</label>
+
+            <input
+                type="text"
+                id="taak-naam"
+                class="tekst-invoer"
+                placeholder="bv. Oefeningen p. 42"
+                onkeydown="if(event.key==='Enter') bevestigTaak()"
+            >
+
+
+            <!-- TIJDSINSCHATTING -->
+
+            <label>Tijdsinschatting</label>
+
+            <div class="schatting-invoer">
+
+                <button
+                    type="button"
+                    onclick="veranderSchatting(-5)">
+                    −
+                </button>
+
+                <div class="schatting-midden">
+                    <span id="schatting-waarde">15</span>
+                    <span class="schatting-eenheid">min</span>
+                </div>
+
+                <button
+                    type="button"
+                    onclick="veranderSchatting(5)">
+                    +
+                </button>
+
+            </div>
+
+
+            <button
+                class="reset-button"
+                onclick="bevestigTaak()">
+                + Toevoegen
+            </button>
+
+        </div>
+
+    </div>
+
+
     <!-- LES TOEVOEGEN POPUP -->
     <div id="les-popup" class="popup">
 
