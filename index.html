@@ -246,6 +246,60 @@
     </main>
 
 
+    <!-- LES TOEVOEGEN POPUP -->
+    <div id="les-popup" class="popup">
+
+        <div class="popup-content">
+
+            <button
+                class="close"
+                onclick="sluitLesPopup()">
+                ✖
+            </button>
+
+            <h2>📚 Les toevoegen</h2>
+
+            <label>Kies een icoontje</label>
+
+            <div class="icoon-kiezer" id="icoon-kiezer">
+                <button type="button" class="icoon-optie" onclick="kiesIcono('📖')">📖</button>
+                <button type="button" class="icoon-optie" onclick="kiesIcono('🔢')">🔢</button>
+                <button type="button" class="icoon-optie" onclick="kiesIcono('📐')">📐</button>
+                <button type="button" class="icoon-optie" onclick="kiesIcono('✏️')">✏️</button>
+                <button type="button" class="icoon-optie" onclick="kiesIcono('🌍')">🌍</button>
+                <button type="button" class="icoon-optie" onclick="kiesIcono('🌿')">🌿</button>
+                <button type="button" class="icoon-optie" onclick="kiesIcono('🔬')">🔬</button>
+                <button type="button" class="icoon-optie" onclick="kiesIcono('🎨')">🎨</button>
+                <button type="button" class="icoon-optie" onclick="kiesIcono('🎵')">🎵</button>
+                <button type="button" class="icoon-optie" onclick="kiesIcono('🏃')">🏃</button>
+                <button type="button" class="icoon-optie" onclick="kiesIcono('💻')">💻</button>
+                <button type="button" class="icoon-optie" onclick="kiesIcono('🗣️')">🗣️</button>
+                <button type="button" class="icoon-optie" onclick="kiesIcono('📜')">📜</button>
+                <button type="button" class="icoon-optie" onclick="kiesIcono('🧮')">🧮</button>
+                <button type="button" class="icoon-optie" onclick="kiesIcono('⭐')">⭐</button>
+            </div>
+
+            <label for="les-naam">Naam van de les</label>
+
+            <input
+                type="text"
+                id="les-naam"
+                class="tekst-invoer"
+                placeholder="bv. Wiskunde"
+                onkeydown="if(event.key==='Enter') bevestigLes()"
+            >
+
+            <button
+                class="reset-button"
+                onclick="bevestigLes()">
+                + Toevoegen
+            </button>
+
+        </div>
+
+    </div>
+
+
     <!-- INSTELLINGEN -->
     <div id="settings" class="popup">
 

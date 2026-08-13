@@ -556,6 +556,111 @@ section {
 
 
 /* ========================================
+   ICOON KIEZER
+======================================== */
+
+.icoon-kiezer {
+
+    display:
+        flex;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        8px;
+
+    margin-top:
+        12px;
+
+}
+
+
+.icoon-optie {
+
+    font-size:
+        24px;
+
+    padding:
+        8px 10px;
+
+    background-color:
+        rgba(0, 0, 0, 0.04);
+
+    border-radius:
+        12px;
+
+    line-height:
+        1;
+
+}
+
+
+.icoon-optie.geselecteerd {
+
+    background-color:
+        #dce8ff;
+
+    transform:
+        scale(1.2);
+
+    box-shadow:
+        0 0 0 2px #7aadff;
+
+}
+
+
+/* ========================================
+   TEKST INVOERVELD
+======================================== */
+
+.tekst-invoer {
+
+    display:
+        block;
+
+    width:
+        100%;
+
+    margin-top:
+        10px;
+
+    padding:
+        12px 14px;
+
+    font-size:
+        15px;
+
+    border:
+        2px solid #dce8ff;
+
+    border-radius:
+        12px;
+
+    outline:
+        none;
+
+    box-sizing:
+        border-box;
+
+    font-family:
+        inherit;
+
+    transition:
+        border-color 0.2s ease;
+
+}
+
+
+.tekst-invoer:focus {
+
+    border-color:
+        #7aadff;
+
+}
+
+
+/* ========================================
    TELEFOON
 ======================================== */
 

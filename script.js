@@ -178,33 +178,104 @@ let lessen =
     ) || [];
 
 
+let geselecteerdIcono = "📖";
+
+
 function voegLesToe() {
 
-    const les =
-        prompt(
-            "Welke les wil je toevoegen?"
+    geselecteerdIcono = "📖";
+
+    document.getElementById(
+        "les-naam"
+    ).value = "";
+
+    document.querySelectorAll(
+        ".icoon-optie"
+    ).forEach(function(btn) {
+        btn.classList.remove("geselecteerd");
+    });
+
+    const eersteKnop =
+        document.querySelector(".icoon-optie");
+
+    if (eersteKnop) {
+        eersteKnop.classList.add("geselecteerd");
+    }
+
+    document.getElementById(
+        "les-popup"
+    ).style.display = "flex";
+
+    setTimeout(function() {
+        document.getElementById(
+            "les-naam"
+        ).focus();
+    }, 100);
+
+}
+
+
+function kiesIcono(icoon) {
+
+    geselecteerdIcono = icoon;
+
+    document.querySelectorAll(
+        ".icoon-optie"
+    ).forEach(function(btn) {
+
+        btn.classList.toggle(
+            "geselecteerd",
+            btn.textContent.trim() === icoon
         );
 
+    });
 
-    if (
-        les !== null &&
-        les.trim() !== ""
-    ) {
-
-        lessen.push(
-            les.trim()
-        );
+}
 
 
-        localStorage.setItem(
-            "lessen",
-            JSON.stringify(lessen)
-        );
+function bevestigLes() {
+
+    const naam =
+        document.getElementById(
+            "les-naam"
+        ).value.trim();
 
 
-        toonLessen();
+    if (naam === "") {
+
+        document.getElementById(
+            "les-naam"
+        ).focus();
+
+        return;
 
     }
+
+
+    lessen.push({
+        icoon: geselecteerdIcono,
+        naam: naam
+    });
+
+
+    localStorage.setItem(
+        "lessen",
+        JSON.stringify(lessen)
+    );
+
+
+    toonLessen();
+
+    sluitLesPopup();
+
+}
+
+
+function sluitLesPopup() {
+
+    document.getElementById(
+        "les-popup"
+    ).style.display = "none";
 
 }
 
@@ -240,12 +311,22 @@ function toonLessen() {
     lessen.forEach(
         function(les, index) {
 
+            const icoon =
+                typeof les === "object"
+                    ? les.icoon
+                    : "📚";
+
+            const naam =
+                typeof les === "object"
+                    ? les.naam
+                    : les;
+
             lijst.innerHTML += `
 
                 <div class="les">
 
                     <span>
-                        📚 ${les}
+                        ${icoon} ${naam}
                     </span>
 
                     <button
