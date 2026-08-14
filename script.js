@@ -1792,8 +1792,8 @@ function toonTaken() {
     const overgeslagenIds = getOvergeslagenIds();
 
 
-    // --- Gecombineerde items bouwen ---
-    const items = [];
+    // --- Hobby-items bouwen en sorteren op datum/tijd ---
+    const hobbyItems = [];
 
     hobbies.forEach(function(hobby, hobbyIdx) {
 
@@ -1812,8 +1812,7 @@ function toonTaken() {
             datumStr <= zondagStr
         ) {
 
-            items.push({
-                type:       "hobby",
+            hobbyItems.push({
                 hobby:      hobby,
                 hobbyIndex: hobbyIdx,
                 datumStr:   datumStr,
@@ -1824,24 +1823,12 @@ function toonTaken() {
 
     });
 
-    taken.forEach(function(taak, index) {
-
-        items.push({
-            type: "taak",
-            taak: taak,
-            index: index,
-            sortKey:
-                (taak.deadline || "9999-12-31") + " 23:59"
-        });
-
-    });
-
-    items.sort(function(a, b) {
+    hobbyItems.sort(function(a, b) {
         return a.sortKey.localeCompare(b.sortKey);
     });
 
 
-    if (items.length === 0) {
+    if (hobbyItems.length === 0 && taken.length === 0) {
 
         lijst.innerHTML =
             `<p class="leeg">
@@ -1853,25 +1840,21 @@ function toonTaken() {
     }
 
 
-    items.forEach(function(item) {
+    // --- Hobby's eerst (gesorteerd op datum) ---
+    hobbyItems.forEach(function(item) {
 
-        if (item.type === "hobby") {
+        toonHobbyBlok(
+            lijst,
+            item.hobby,
+            item.datumStr,
+            item.hobbyIndex
+        );
 
-            toonHobbyBlok(
-                lijst,
-                item.hobby,
-                item.datumStr,
-                item.hobbyIndex
-            );
-
-            return;
-
-        }
+    });
 
 
-        // --- Taak ---
-        const taak = item.taak;
-        const index = item.index;
+    // --- Taken (in jouw volgorde, sleepbaar) ---
+    taken.forEach(function(taak, index) {
 
         const vak =
             taak.vak || null;
@@ -2002,9 +1985,17 @@ function toonTaken() {
 
         lijst.innerHTML += `
 
-            <div class="taak ${taak.klaar ? "klaar" : ""}">
+            <div class="taak ${taak.klaar ? "klaar" : ""}"
+                 draggable="true"
+                 data-taak-index="${index}">
 
                 <div class="taak-top">
+
+                    <span
+                        class="sleep-greep"
+                        title="Slepen om te herordenen">
+                        ⠿
+                    </span>
 
                     <label>
 
@@ -2093,6 +2084,291 @@ function toonTaken() {
         timerInterval = null;
 
     }
+
+}
+
+
+/* ========================================
+   SLEPEN TAKEN (drag & drop)
+======================================== */
+
+let _sleepVanIndex = null;
+let _sleepDoel     = null;
+let _touchKloon    = null;
+let _touchOrigEl   = null;
+
+
+function initSlepenTaken() {
+
+    const lijst =
+        document.getElementById("taken");
+
+    if (!lijst || lijst._sleepInit) return;
+    lijst._sleepInit = true;
+
+
+    /* --- Desktop: HTML5 drag events (event delegation) --- */
+
+    lijst.addEventListener("dragstart", function(e) {
+
+        const el =
+            e.target.closest(".taak[draggable]");
+
+        if (!el || el.dataset.taakIndex === undefined) return;
+
+        _sleepVanIndex =
+            parseInt(el.dataset.taakIndex);
+
+        e.dataTransfer.effectAllowed = "move";
+
+        // Klein uitstel zodat de ghost nog zichtbaar is
+        setTimeout(function() {
+            el.classList.add("sleep-bezig");
+        }, 0);
+
+    });
+
+
+    lijst.addEventListener("dragend", function() {
+
+        document.querySelectorAll(
+            ".taak.sleep-bezig, .taak.sleep-voor, .taak.sleep-na"
+        ).forEach(function(el) {
+            el.classList.remove(
+                "sleep-bezig", "sleep-voor", "sleep-na"
+            );
+        });
+
+        _sleepVanIndex = null;
+        _sleepDoel     = null;
+
+    });
+
+
+    lijst.addEventListener("dragover", function(e) {
+
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+
+        const el =
+            e.target.closest(".taak[draggable]");
+
+        document.querySelectorAll(
+            ".taak.sleep-voor, .taak.sleep-na"
+        ).forEach(function(t) {
+            t.classList.remove("sleep-voor", "sleep-na");
+        });
+
+        if (el && el.dataset.taakIndex !== undefined) {
+
+            const rect = el.getBoundingClientRect();
+            const midY = rect.top + rect.height / 2;
+
+            if (e.clientY < midY) {
+                el.classList.add("sleep-voor");
+                _sleepDoel = {
+                    index:   parseInt(el.dataset.taakIndex),
+                    positie: "voor"
+                };
+            } else {
+                el.classList.add("sleep-na");
+                _sleepDoel = {
+                    index:   parseInt(el.dataset.taakIndex),
+                    positie: "na"
+                };
+            }
+
+        }
+
+    });
+
+
+    lijst.addEventListener("drop", function(e) {
+
+        e.preventDefault();
+
+        if (
+            _sleepVanIndex === null ||
+            !_sleepDoel ||
+            _sleepDoel.index === _sleepVanIndex
+        ) return;
+
+        pasVolgordeToe(_sleepVanIndex, _sleepDoel);
+
+    });
+
+
+    /* --- Mobiel: touch events via sleep-greep --- */
+
+    lijst.addEventListener("touchstart", function(e) {
+
+        const greep =
+            e.target.closest(".sleep-greep");
+
+        if (!greep) return;
+
+        const el =
+            greep.closest(".taak[draggable]");
+
+        if (!el || el.dataset.taakIndex === undefined) return;
+
+        _sleepVanIndex = parseInt(el.dataset.taakIndex);
+        _touchOrigEl   = el;
+
+        const rect  = el.getBoundingClientRect();
+
+        // Kloon van de kaart om mee te slepen
+        _touchKloon = el.cloneNode(true);
+
+        _touchKloon.style.cssText = [
+            "position:fixed",
+            "left:"   + rect.left   + "px",
+            "top:"    + rect.top    + "px",
+            "width:"  + rect.width  + "px",
+            "opacity:0.88",
+            "z-index:9999",
+            "pointer-events:none",
+            "box-shadow:0 8px 24px rgba(0,0,0,0.22)",
+            "border-radius:14px",
+            "transition:none"
+        ].join(";");
+
+        document.body.appendChild(_touchKloon);
+        el.style.opacity = "0.25";
+
+        e.preventDefault();
+
+    }, { passive: false });
+
+
+    lijst.addEventListener("touchmove", function(e) {
+
+        if (_sleepVanIndex === null || !_touchKloon) return;
+
+        e.preventDefault();
+
+        const touch  = e.touches[0];
+        const kloonH = _touchKloon.offsetHeight;
+        const kloonW = _touchKloon.offsetWidth;
+
+        _touchKloon.style.top  =
+            (touch.clientY - kloonH / 2) + "px";
+
+        _touchKloon.style.left =
+            (touch.clientX - kloonW / 2) + "px";
+
+
+        // Vind element onder de vinger
+        _touchKloon.style.visibility = "hidden";
+
+        const onderEl =
+            document.elementFromPoint(
+                touch.clientX,
+                touch.clientY
+            );
+
+        _touchKloon.style.visibility = "";
+
+
+        document.querySelectorAll(
+            ".taak.sleep-voor, .taak.sleep-na"
+        ).forEach(function(t) {
+            t.classList.remove("sleep-voor", "sleep-na");
+        });
+
+
+        const doelTaak =
+            onderEl
+                ? onderEl.closest(".taak[draggable]")
+                : null;
+
+        if (doelTaak && doelTaak !== _touchOrigEl) {
+
+            const rect = doelTaak.getBoundingClientRect();
+            const midY = rect.top + rect.height / 2;
+
+            if (touch.clientY < midY) {
+                doelTaak.classList.add("sleep-voor");
+                _sleepDoel = {
+                    index:   parseInt(doelTaak.dataset.taakIndex),
+                    positie: "voor"
+                };
+            } else {
+                doelTaak.classList.add("sleep-na");
+                _sleepDoel = {
+                    index:   parseInt(doelTaak.dataset.taakIndex),
+                    positie: "na"
+                };
+            }
+
+        } else {
+            _sleepDoel = null;
+        }
+
+    }, { passive: false });
+
+
+    lijst.addEventListener("touchend", function() {
+
+        if (_touchKloon) {
+            _touchKloon.remove();
+            _touchKloon = null;
+        }
+
+        if (_touchOrigEl) {
+            _touchOrigEl.style.opacity = "";
+            _touchOrigEl = null;
+        }
+
+        document.querySelectorAll(
+            ".taak.sleep-voor, .taak.sleep-na"
+        ).forEach(function(t) {
+            t.classList.remove("sleep-voor", "sleep-na");
+        });
+
+        if (
+            _sleepVanIndex !== null &&
+            _sleepDoel !== null &&
+            _sleepDoel.index !== _sleepVanIndex
+        ) {
+            pasVolgordeToe(_sleepVanIndex, _sleepDoel);
+        }
+
+        _sleepVanIndex = null;
+        _sleepDoel     = null;
+
+    });
+
+}
+
+
+function pasVolgordeToe(vanIndex, doel) {
+
+    const taak = taken.splice(vanIndex, 1)[0];
+
+    // Bereken nieuwe positie na de splice
+    // (alle indices na vanIndex schuiven 1 omlaag)
+    let nieuweIndex = doel.index;
+
+    if (doel.positie === "na") {
+        nieuweIndex++;
+    }
+
+    if (doel.index > vanIndex) {
+        nieuweIndex--;
+    }
+
+    nieuweIndex =
+        Math.max(0, Math.min(taken.length, nieuweIndex));
+
+    taken.splice(nieuweIndex, 0, taak);
+
+    localStorage.setItem(
+        "taken",
+        JSON.stringify(taken)
+    );
+
+    toonTaken();
 
 }
 
@@ -3137,6 +3413,9 @@ window.onload =
         toonTaken();
         toonKalender();
         laadKleuren();
+
+        // Slepen activeren
+        initSlepenTaken();
 
 
         // Herstart interval als er lopende timers zijn

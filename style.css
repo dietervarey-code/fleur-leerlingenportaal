@@ -879,6 +879,100 @@ section {
 
 
 /* ========================================
+   SLEPEN TAKEN
+======================================== */
+
+.sleep-greep {
+
+    font-size:
+        20px;
+
+    color:
+        #ccc;
+
+    padding:
+        2px 7px;
+
+    background:
+        none;
+
+    border-radius:
+        6px;
+
+    user-select:
+        none;
+
+    touch-action:
+        none;
+
+    flex-shrink:
+        0;
+
+    line-height:
+        1;
+
+    cursor:
+        grab;
+
+}
+
+
+.sleep-greep:hover {
+
+    color:
+        #999;
+
+    background:
+        rgba(0, 0, 0, 0.07);
+
+    opacity:
+        1;
+
+    transform:
+        none;
+
+}
+
+
+.sleep-greep:active {
+
+    cursor:
+        grabbing;
+
+}
+
+
+/* Originele kaart tijdens slepen: doorzichtig */
+.taak.sleep-bezig {
+
+    opacity:
+        0.3;
+
+}
+
+
+/* Drop-indicator: blauwe streep boven de kaart */
+.taak.sleep-voor {
+
+    border-top:
+        3px solid #4a90e2;
+
+    margin-top:
+        7px;
+
+}
+
+
+/* Drop-indicator: blauwe streep onder de kaart */
+.taak.sleep-na {
+
+    border-bottom:
+        3px solid #4a90e2;
+
+}
+
+
+/* ========================================
    LEGE MELDING
 ======================================== */
 
