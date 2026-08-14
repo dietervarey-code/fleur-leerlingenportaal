@@ -30,6 +30,7 @@
                 id="header-avatar"
                 onclick="openSettings()"
                 title="Profielfoto — klik voor instellingen">
+                👤
             </div>
 
             <button onclick="openSettings()">
@@ -45,6 +46,14 @@
 
         <!-- WELKOM -->
         <section class="welkom">
+
+            <div
+                id="welkom-avatar"
+                class="welkom-avatar"
+                onclick="openSettings()"
+                title="Klik om je profielfoto te wijzigen">
+                👤
+            </div>
 
             <h2>Hallo! 👋</h2>
 
@@ -482,14 +491,30 @@
                     class="profiel-avatar"
                     id="settings-avatar"
                     onclick="kiesProfielFoto()"
-                    title="Klik om een foto te maken of te kiezen">
+                    title="Klik om een foto te kiezen">
                     <span id="profiel-placeholder">📷</span>
                 </div>
 
                 <p class="profiel-uitleg">
-                    Klik op de cirkel om een selfie te maken<br>
-                    of een foto van je telefoon te kiezen
+                    Klik op de cirkel of gebruik de knop hieronder
                 </p>
+
+                <div class="profiel-knoppen">
+                    <button
+                        class="knop knop-foto"
+                        onclick="kiesProfielFoto()"
+                        type="button">
+                        📁 Kies foto
+                    </button>
+                    <button
+                        class="knop knop-foto knop-foto-verwijder"
+                        id="foto-verwijder-knop"
+                        onclick="verwijderProfielFoto()"
+                        type="button"
+                        style="display:none">
+                        🗑️ Verwijder foto
+                    </button>
+                </div>
 
             </div>
 

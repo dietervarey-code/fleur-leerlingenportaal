@@ -3,7 +3,7 @@
    Zorgt voor offline werking en installeerbaarheid
 ================================================ */
 
-const CACHE_NAAM = "fleur-portaal-v1";
+const CACHE_NAAM = "fleur-portaal-v2";
 
 const APP_SHELL = [
     "./",

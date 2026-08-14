@@ -3061,6 +3061,14 @@ function toonProfielFoto(dataUrl) {
 
     }
 
+    // Verwijder-knop zichtbaar maken
+    const verwijderKnop =
+        document.getElementById("foto-verwijder-knop");
+
+    if (verwijderKnop) {
+        verwijderKnop.style.display = "";
+    }
+
 }
 
 
@@ -3101,6 +3109,14 @@ function verwijderProfielFoto() {
         if (placeholder) {
             placeholder.style.display = "";
         }
+    }
+
+    // Verwijder-knop weer verbergen
+    const verwijderKnop =
+        document.getElementById("foto-verwijder-knop");
+
+    if (verwijderKnop) {
+        verwijderKnop.style.display = "none";
     }
 
 
