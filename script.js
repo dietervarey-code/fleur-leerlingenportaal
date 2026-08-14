@@ -1,4 +1,130 @@
 /* ========================================
+   WEER
+======================================== */
+
+const weerCodes = {
+    0:  { icoon: "☀️",  naam: "Stralend zonnig" },
+    1:  { icoon: "🌤️", naam: "Overwegend zonnig" },
+    2:  { icoon: "⛅",  naam: "Wisselend bewolkt" },
+    3:  { icoon: "☁️",  naam: "Bewolkt" },
+    45: { icoon: "🌫️", naam: "Mistig" },
+    48: { icoon: "🌫️", naam: "IJsmist" },
+    51: { icoon: "🌦️", naam: "Lichte motregen" },
+    53: { icoon: "🌦️", naam: "Motregen" },
+    55: { icoon: "🌧️", naam: "Zware motregen" },
+    56: { icoon: "🌨️", naam: "IJzel" },
+    57: { icoon: "🌨️", naam: "Zware ijzel" },
+    61: { icoon: "🌧️", naam: "Lichte regen" },
+    63: { icoon: "🌧️", naam: "Regen" },
+    65: { icoon: "🌧️", naam: "Zware regen" },
+    66: { icoon: "🌨️", naam: "Bevriezende regen" },
+    67: { icoon: "🌨️", naam: "Zware bevriezende regen" },
+    71: { icoon: "❄️",  naam: "Lichte sneeuw" },
+    73: { icoon: "❄️",  naam: "Sneeuw" },
+    75: { icoon: "❄️",  naam: "Zware sneeuw" },
+    77: { icoon: "🌨️", naam: "IJskristallen" },
+    80: { icoon: "🌦️", naam: "Lichte buien" },
+    81: { icoon: "🌧️", naam: "Buien" },
+    82: { icoon: "⛈️",  naam: "Zware buien" },
+    85: { icoon: "🌨️", naam: "Sneeuwbuien" },
+    86: { icoon: "🌨️", naam: "Zware sneeuwbuien" },
+    95: { icoon: "⛈️",  naam: "Onweer" },
+    96: { icoon: "⛈️",  naam: "Onweer met hagel" },
+    99: { icoon: "⛈️",  naam: "Zwaar onweer met hagel" }
+};
+
+
+function haalWeer() {
+
+    const element =
+        document.getElementById("weer-status");
+
+    if (!element) {
+        return;
+    }
+
+    if (!navigator.geolocation) {
+        element.textContent = "";
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+
+        function(positie) {
+
+            const lat =
+                positie.coords.latitude.toFixed(4);
+
+            const lon =
+                positie.coords.longitude.toFixed(4);
+
+            fetch(
+                "https://api.open-meteo.com/v1/forecast" +
+                "?latitude=" + lat +
+                "&longitude=" + lon +
+                "&current=temperature_2m,apparent_temperature,weather_code" +
+                "&timezone=auto"
+            )
+            .then(function(r) {
+                return r.json();
+            })
+            .then(function(data) {
+
+                const temp =
+                    Math.round(
+                        data.current.temperature_2m
+                    );
+
+                const gevoels =
+                    Math.round(
+                        data.current.apparent_temperature
+                    );
+
+                const code =
+                    data.current.weather_code;
+
+                const weer =
+                    weerCodes[code] ||
+                    { icoon: "🌡️", naam: "Onbekend" };
+
+                let html =
+                    weer.icoon +
+                    " <strong>" + temp + "°C</strong>" +
+                    " · " + weer.naam;
+
+                // Voeltemperatuur tonen als die erg verschilt
+                if (Math.abs(gevoels - temp) >= 3) {
+                    html +=
+                        " <span class='gevoels'>" +
+                        "(voelt als " + gevoels + "°)" +
+                        "</span>";
+                }
+
+                element.innerHTML = html;
+
+            })
+            .catch(function() {
+                element.textContent = "";
+            });
+
+        },
+
+        function() {
+            // Locatie geweigerd — geen weer tonen
+            element.textContent = "";
+        },
+
+        {
+            timeout:     8000,
+            maximumAge:  600000  // 10 min cache
+        }
+
+    );
+
+}
+
+
+/* ========================================
    SCHOOLSTATUS
 ======================================== */
 
@@ -3672,6 +3798,9 @@ window.onload =
     function() {
 
         toonSchoolStatus();
+
+        // Huidig weer ophalen (via geolocatie + Open-Meteo)
+        haalWeer();
 
         // Supabase starten (laadt cloud-data via onAuthStateChange)
         initSupabase();
