@@ -836,6 +836,48 @@ section {
 }
 
 
+.bewerk {
+
+    background-color:
+        #e8f4fd;
+
+    padding:
+        8px 11px;
+
+}
+
+
+.item-acties {
+
+    display:
+        flex;
+
+    gap:
+        6px;
+
+    align-items:
+        center;
+
+    flex-shrink:
+        0;
+
+}
+
+
+.event-bewerk-invoer {
+
+    margin-top:
+        0 !important;
+
+    padding:
+        6px 10px !important;
+
+    font-size:
+        14px !important;
+
+}
+
+
 /* ========================================
    LEGE MELDING
 ======================================== */

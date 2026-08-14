@@ -178,11 +178,13 @@ let lessen =
     ) || [];
 
 
-let geselecteerdIcono = "📖";
+let geselecteerdIcono  = "📖";
+let lessenBewerkIndex  = null;
 
 
 function voegLesToe() {
 
+    lessenBewerkIndex = null;
     geselecteerdIcono = "📖";
 
     document.getElementById(
@@ -201,6 +203,10 @@ function voegLesToe() {
     if (eersteKnop) {
         eersteKnop.classList.add("geselecteerd");
     }
+
+    document.querySelector(
+        "#les-popup .reset-button"
+    ).textContent = "+ Toevoegen";
 
     document.getElementById(
         "les-popup"
@@ -252,10 +258,21 @@ function bevestigLes() {
     }
 
 
-    lessen.push({
-        icoon: geselecteerdIcono,
-        naam: naam
-    });
+    if (lessenBewerkIndex !== null) {
+
+        lessen[lessenBewerkIndex] = {
+            icoon: geselecteerdIcono,
+            naam: naam
+        };
+
+    } else {
+
+        lessen.push({
+            icoon: geselecteerdIcono,
+            naam: naam
+        });
+
+    }
 
 
     localStorage.setItem(
@@ -273,9 +290,47 @@ function bevestigLes() {
 
 function sluitLesPopup() {
 
+    lessenBewerkIndex = null;
+
     document.getElementById(
         "les-popup"
     ).style.display = "none";
+
+}
+
+
+function bewerkLes(index) {
+
+    const les = lessen[index];
+    lessenBewerkIndex = index;
+    geselecteerdIcono = les.icoon || "📖";
+
+    document.getElementById(
+        "les-naam"
+    ).value = les.naam || "";
+
+    document.querySelectorAll(
+        "#icoon-kiezer .icoon-optie"
+    ).forEach(function(btn) {
+        btn.classList.toggle(
+            "geselecteerd",
+            btn.textContent.trim() === geselecteerdIcono
+        );
+    });
+
+    document.querySelector(
+        "#les-popup .reset-button"
+    ).textContent = "✓ Opslaan";
+
+    document.getElementById(
+        "les-popup"
+    ).style.display = "flex";
+
+    setTimeout(function() {
+        document.getElementById(
+            "les-naam"
+        ).focus();
+    }, 100);
 
 }
 
@@ -329,13 +384,22 @@ function toonLessen() {
                         ${icoon} ${naam}
                     </span>
 
-                    <button
-                        class="verwijder"
-                        onclick="verwijderLes(${index})">
+                    <div class="item-acties">
 
-                        🗑️
+                        <button
+                            class="bewerk"
+                            onclick="bewerkLes(${index})"
+                            title="Bewerken">
+                            ✏️
+                        </button>
 
-                    </button>
+                        <button
+                            class="verwijder"
+                            onclick="verwijderLes(${index})">
+                            🗑️
+                        </button>
+
+                    </div>
 
                 </div>
 
@@ -389,6 +453,9 @@ let geselecteerdNieuwVakIcono =
 
 let schattingMinuten =
     15;
+
+let taakBewerkIndex =
+    null;
 
 
 /* --- Timer --- */
@@ -631,6 +698,7 @@ function updateTimerDisplays() {
 
 function voegTaakToe() {
 
+    taakBewerkIndex = null;
     geselecteerdVak = null;
     nieuwVakModus = false;
     geselecteerdNieuwVakIcono = "📖";
@@ -661,6 +729,10 @@ function voegTaakToe() {
 
 
     vulVakKiezer();
+
+    document.querySelector(
+        "#taak-popup .reset-button"
+    ).textContent = "+ Toevoegen";
 
     document.getElementById(
         "taak-popup"
@@ -960,16 +1032,36 @@ function bevestigTaak() {
         ).value || null;
 
 
-    taken.push({
-        vak: geselecteerdVak,
-        naam: taakNaam,
-        klaar: false,
-        deadline: deadlineWaarde,
-        schatting: schattingMinuten,
-        looptijd: 0,
-        loopStatus: "gestopt",
-        startTijdstip: null
-    });
+    if (taakBewerkIndex !== null) {
+
+        // Behoud timer-gegevens bij bewerking
+        const bestaand = taken[taakBewerkIndex];
+
+        taken[taakBewerkIndex] = {
+            vak:          geselecteerdVak,
+            naam:         taakNaam,
+            klaar:        bestaand.klaar        || false,
+            deadline:     deadlineWaarde,
+            schatting:    schattingMinuten,
+            looptijd:     bestaand.looptijd     || 0,
+            loopStatus:   bestaand.loopStatus   || "gestopt",
+            startTijdstip: bestaand.startTijdstip || null
+        };
+
+    } else {
+
+        taken.push({
+            vak:          geselecteerdVak,
+            naam:         taakNaam,
+            klaar:        false,
+            deadline:     deadlineWaarde,
+            schatting:    schattingMinuten,
+            looptijd:     0,
+            loopStatus:   "gestopt",
+            startTijdstip: null
+        });
+
+    }
 
 
     localStorage.setItem(
@@ -987,9 +1079,74 @@ function bevestigTaak() {
 
 function sluitTaakPopup() {
 
+    taakBewerkIndex = null;
+
     document.getElementById(
         "taak-popup"
     ).style.display = "none";
+
+}
+
+
+function bewerkTaak(index) {
+
+    const taak = taken[index];
+    taakBewerkIndex = index;
+
+    geselecteerdVak           = taak.vak || null;
+    nieuwVakModus             = false;
+    geselecteerdNieuwVakIcono = "📖";
+    schattingMinuten          = taak.schatting || 15;
+
+    document.getElementById(
+        "taak-naam"
+    ).value = taak.naam || "";
+
+    document.getElementById(
+        "schatting-waarde"
+    ).textContent = schattingMinuten;
+
+    document.getElementById(
+        "nieuw-vak-naam"
+    ).value = "";
+
+    document.getElementById(
+        "taak-deadline"
+    ).value = taak.deadline || "";
+
+    vulVakKiezer();
+
+    // Selecteer het juiste vak in de kiezer
+    if (geselecteerdVak) {
+
+        const zoekTekst =
+            geselecteerdVak.icoon + " " + geselecteerdVak.naam;
+
+        document.querySelectorAll(
+            ".vak-chip:not(.nieuw-vak)"
+        ).forEach(function(chip) {
+
+            if (chip.textContent.trim() === zoekTekst) {
+                chip.classList.add("geselecteerd");
+            }
+
+        });
+
+    }
+
+    document.querySelector(
+        "#taak-popup .reset-button"
+    ).textContent = "✓ Opslaan";
+
+    document.getElementById(
+        "taak-popup"
+    ).style.display = "flex";
+
+    setTimeout(function() {
+        document.getElementById(
+            "taak-naam"
+        ).focus();
+    }, 150);
 
 }
 
@@ -1203,11 +1360,13 @@ function herstelHobby(hobbyId) {
 /* --- Hobby popup --- */
 
 let geselecteerdHobbyIcono = "⚽";
-let geselecteerdDag = 1;
+let geselecteerdDag        = 1;
+let hobbyBewerkIndex       = null;
 
 
 function voegHobbyToe() {
 
+    hobbyBewerkIndex = null;
     geselecteerdHobbyIcono = "⚽";
     geselecteerdDag = 1;
 
@@ -1250,6 +1409,10 @@ function voegHobbyToe() {
         );
     });
 
+
+    document.querySelector(
+        "#hobby-popup .reset-button"
+    ).textContent = "+ Toevoegen";
 
     document.getElementById(
         "hobby-popup"
@@ -1331,14 +1494,22 @@ function bevestigHobby() {
     }
 
 
-    hobbies.push({
-        id: Date.now(),
-        icoon: geselecteerdHobbyIcono,
-        naam: naam,
-        dag: geselecteerdDag,
+    const hobbyData = {
+        id:     hobbyBewerkIndex !== null
+                    ? hobbies[hobbyBewerkIndex].id
+                    : Date.now(),
+        icoon:  geselecteerdHobbyIcono,
+        naam:   naam,
+        dag:    geselecteerdDag,
         vanUur: van,
         totUur: tot
-    });
+    };
+
+    if (hobbyBewerkIndex !== null) {
+        hobbies[hobbyBewerkIndex] = hobbyData;
+    } else {
+        hobbies.push(hobbyData);
+    }
 
 
     localStorage.setItem(
@@ -1356,9 +1527,68 @@ function bevestigHobby() {
 
 function sluitHobbyPopup() {
 
+    hobbyBewerkIndex = null;
+
     document.getElementById(
         "hobby-popup"
     ).style.display = "none";
+
+}
+
+
+function bewerkHobby(index) {
+
+    const hobby = hobbies[index];
+    hobbyBewerkIndex = index;
+
+    geselecteerdHobbyIcono = hobby.icoon || "⚽";
+    geselecteerdDag        = hobby.dag !== undefined ? hobby.dag : 1;
+
+    document.getElementById(
+        "hobby-naam"
+    ).value = hobby.naam || "";
+
+    document.getElementById(
+        "hobby-van"
+    ).value = hobby.vanUur || "14:00";
+
+    document.getElementById(
+        "hobby-tot"
+    ).value = hobby.totUur || "16:00";
+
+    // Selecteer icoon
+    document.querySelectorAll(
+        "#hobby-icoon-kiezer .icoon-optie"
+    ).forEach(function(btn) {
+        btn.classList.toggle(
+            "geselecteerd",
+            btn.textContent.trim() === geselecteerdHobbyIcono
+        );
+    });
+
+    // Selecteer dag
+    document.querySelectorAll(
+        ".dag-chip"
+    ).forEach(function(btn) {
+        btn.classList.toggle(
+            "geselecteerd",
+            parseInt(btn.dataset.dag) === geselecteerdDag
+        );
+    });
+
+    document.querySelector(
+        "#hobby-popup .reset-button"
+    ).textContent = "✓ Opslaan";
+
+    document.getElementById(
+        "hobby-popup"
+    ).style.display = "flex";
+
+    setTimeout(function() {
+        document.getElementById(
+            "hobby-naam"
+        ).focus();
+    }, 100);
 
 }
 
@@ -1433,6 +1663,13 @@ function toonHobbies() {
                     </button>
 
                     <button
+                        class="bewerk"
+                        onclick="bewerkHobby(${index})"
+                        title="Bewerken">
+                        ✏️
+                    </button>
+
+                    <button
                         class="verwijder"
                         onclick="verwijderHobby(${index})">
                         🗑️
@@ -1466,7 +1703,7 @@ function verwijderHobby(index) {
 
 /* --- Gecombineerde planning --- */
 
-function toonHobbyBlok(lijst, hobby, datumStr) {
+function toonHobbyBlok(lijst, hobby, datumStr, hobbyIndex) {
 
     const [j, ma, d] =
         datumStr.split("-").map(Number);
@@ -1498,12 +1735,23 @@ function toonHobbyBlok(lijst, hobby, datumStr) {
 
             </div>
 
-            <button
-                class="hobby-blok-overslaan"
-                onclick="slaanOver(${hobby.id})"
-                title="Niet deze week">
-                ✕
-            </button>
+            <div class="item-acties">
+
+                <button
+                    class="bewerk"
+                    onclick="bewerkHobby(${hobbyIndex})"
+                    title="Bewerken">
+                    ✏️
+                </button>
+
+                <button
+                    class="hobby-blok-overslaan"
+                    onclick="slaanOver(${hobby.id})"
+                    title="Niet deze week">
+                    ✕
+                </button>
+
+            </div>
 
         </div>
 
@@ -1547,7 +1795,7 @@ function toonTaken() {
     // --- Gecombineerde items bouwen ---
     const items = [];
 
-    hobbies.forEach(function(hobby) {
+    hobbies.forEach(function(hobby, hobbyIdx) {
 
         if (overgeslagenIds.includes(hobby.id)) {
             return;
@@ -1565,10 +1813,11 @@ function toonTaken() {
         ) {
 
             items.push({
-                type: "hobby",
-                hobby: hobby,
-                datumStr: datumStr,
-                sortKey: datumStr + " " + hobby.vanUur
+                type:       "hobby",
+                hobby:      hobby,
+                hobbyIndex: hobbyIdx,
+                datumStr:   datumStr,
+                sortKey:    datumStr + " " + hobby.vanUur
             });
 
         }
@@ -1611,7 +1860,8 @@ function toonTaken() {
             toonHobbyBlok(
                 lijst,
                 item.hobby,
-                item.datumStr
+                item.datumStr,
+                item.hobbyIndex
             );
 
             return;
@@ -1770,11 +2020,22 @@ function toonTaken() {
                     </label>
 
 
-                    <button
-                        class="verwijder"
-                        onclick="verwijderTaak(${index})">
-                        🗑️
-                    </button>
+                    <div class="item-acties">
+
+                        <button
+                            class="bewerk"
+                            onclick="bewerkTaak(${index})"
+                            title="Bewerken">
+                            ✏️
+                        </button>
+
+                        <button
+                            class="verwijder"
+                            onclick="verwijderTaak(${index})">
+                            🗑️
+                        </button>
+
+                    </div>
 
                 </div>
 
@@ -2500,17 +2761,29 @@ function toonEventLijst() {
 
         lijst.innerHTML += `
 
-            <div class="event-item">
+            <div class="event-item" id="event-item-${index}">
 
-                <span class="event-tekst">
+                <span class="event-tekst" id="event-tekst-${index}">
                     ${event}
                 </span>
 
-                <button
-                    class="verwijder"
-                    onclick="verwijderEvent(${index})">
-                    🗑️
-                </button>
+                <div class="item-acties">
+
+                    <button
+                        class="bewerk"
+                        id="event-bewerk-knop-${index}"
+                        onclick="bewerkEvent(${index})"
+                        title="Bewerken">
+                        ✏️
+                    </button>
+
+                    <button
+                        class="verwijder"
+                        onclick="verwijderEvent(${index})">
+                        🗑️
+                    </button>
+
+                </div>
 
             </div>
 
@@ -2568,6 +2841,79 @@ function verwijderEvent(index) {
         JSON.stringify(evenementen)
     );
 
+
+    toonEventLijst();
+    toonKalender();
+
+}
+
+
+function bewerkEvent(index) {
+
+    const events =
+        evenementen[huidigKalenderDag] || [];
+
+    const origineleTekst =
+        events[index] || "";
+
+    const tekstSpan =
+        document.getElementById("event-tekst-" + index);
+
+    const bewerkKnop =
+        document.getElementById("event-bewerk-knop-" + index);
+
+    if (!tekstSpan) return;
+
+    // Vervang tekst door invoerveld
+    tekstSpan.innerHTML =
+        `<input
+            type="text"
+            class="tekst-invoer event-bewerk-invoer"
+            id="event-bewerk-invoer-${index}"
+            value="${origineleTekst.replace(/"/g, '&quot;')}"
+            onkeydown="if(event.key==='Enter') slaEventBewerkingOp(${index})"
+        >`;
+
+    const invoer =
+        document.getElementById(
+            "event-bewerk-invoer-" + index
+        );
+
+    if (invoer) {
+        invoer.focus();
+        invoer.select();
+    }
+
+    // Verander bewerkknop in opslaanknop
+    if (bewerkKnop) {
+        bewerkKnop.textContent = "✓";
+        bewerkKnop.onclick = function() {
+            slaEventBewerkingOp(index);
+        };
+    }
+
+}
+
+
+function slaEventBewerkingOp(index) {
+
+    const invoer =
+        document.getElementById(
+            "event-bewerk-invoer-" + index
+        );
+
+    if (!invoer) return;
+
+    const nieuweTekst = invoer.value.trim();
+
+    if (!nieuweTekst) return;
+
+    evenementen[huidigKalenderDag][index] = nieuweTekst;
+
+    localStorage.setItem(
+        "evenementen",
+        JSON.stringify(evenementen)
+    );
 
     toonEventLijst();
     toonKalender();
