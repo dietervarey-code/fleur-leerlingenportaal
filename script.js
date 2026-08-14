@@ -3611,6 +3611,60 @@ function toonKalender() {
 
 
 /* ========================================
+   PAGINANAVIGATIE (zijbalk)
+======================================== */
+
+const paginaNamen = {
+    welkom:   "Mijn Portaal",
+    lessen:   "📚 Lessen",
+    hobbies:  "🎮 Hobby's",
+    planning: "📋 Planning",
+    kalender: "📅 Kalender"
+};
+
+
+function toonPagina(paginaId) {
+
+    // Verberg alle pagina's
+    document.querySelectorAll(".pagina").forEach(function(p) {
+        p.classList.remove("actief");
+    });
+
+    // Toon de gevraagde pagina
+    const pagina =
+        document.getElementById("pagina-" + paginaId);
+
+    if (pagina) {
+        pagina.classList.add("actief");
+    }
+
+    // Markeer actief nav-item
+    document.querySelectorAll(".nav-item[data-pagina]").forEach(function(btn) {
+        btn.classList.toggle(
+            "actief",
+            btn.dataset.pagina === paginaId
+        );
+    });
+
+    // Update mobiele titelbalk
+    const mobieltitel =
+        document.querySelector(".mobiel-header h1");
+
+    if (mobieltitel) {
+        mobieltitel.textContent =
+            paginaNamen[paginaId] || "Mijn Portaal";
+    }
+
+    // Sla huidige pagina op
+    localStorage.setItem("huidigePagina", paginaId);
+
+    // Scroll naar boven
+    window.scrollTo(0, 0);
+
+}
+
+
+/* ========================================
    PAGINA STARTEN
 ======================================== */
 
@@ -3634,6 +3688,12 @@ window.onload =
 
         // Profielfoto laden
         laadProfielFoto();
+
+        // Herstel laatste pagina (of start op welkom)
+        const opgeslagenPagina =
+            localStorage.getItem("huidigePagina") || "welkom";
+
+        toonPagina(opgeslagenPagina);
 
 
         // Herstart interval als er lopende timers zijn

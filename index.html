@@ -19,33 +19,73 @@
 
 <body>
 
-    <!-- BOVENSTE MENU -->
-    <header>
+    <!-- MOBIELE BOVENBALK (alleen zichtbaar op telefoon) -->
+    <header class="mobiel-header">
         <h1>🎓 Mijn Portaal</h1>
+        <button onclick="openSettings()">⚙️</button>
+    </header>
 
-        <div class="header-acties">
 
+    <!-- APP LAYOUT: zijbalk + inhoud -->
+    <div id="portaal-layout">
+
+
+    <!-- LINKERZIJBALK -->
+    <nav class="zijbalk">
+
+        <div class="zijbalk-header">
             <div
-                class="profiel-avatar-klein"
                 id="header-avatar"
+                class="profiel-avatar-klein"
                 onclick="openSettings()"
                 title="Profielfoto — klik voor instellingen">
                 👤
             </div>
+            <span class="zijbalk-titel">Mijn Portaal 🎓</span>
+        </div>
 
-            <button onclick="openSettings()">
-                ⚙️ Instellingen
+        <div class="zijbalk-nav">
+
+            <button class="nav-item actief" data-pagina="welkom" onclick="toonPagina('welkom')">
+                <span class="nav-icoon">🏠</span>
+                <span class="nav-label">Start</span>
+            </button>
+
+            <button class="nav-item" data-pagina="lessen" onclick="toonPagina('lessen')">
+                <span class="nav-icoon">📚</span>
+                <span class="nav-label">Lessen</span>
+            </button>
+
+            <button class="nav-item" data-pagina="hobbies" onclick="toonPagina('hobbies')">
+                <span class="nav-icoon">🎮</span>
+                <span class="nav-label">Hobby's</span>
+            </button>
+
+            <button class="nav-item" data-pagina="planning" onclick="toonPagina('planning')">
+                <span class="nav-icoon">📋</span>
+                <span class="nav-label">Planning</span>
+            </button>
+
+            <button class="nav-item" data-pagina="kalender" onclick="toonPagina('kalender')">
+                <span class="nav-icoon">📅</span>
+                <span class="nav-label">Kalender</span>
+            </button>
+
+            <button class="nav-item nav-instellingen" onclick="openSettings()">
+                <span class="nav-icoon">⚙️</span>
+                <span class="nav-label">Instellingen</span>
             </button>
 
         </div>
-    </header>
+
+    </nav>
 
 
-    <!-- HOOFDGEDEELTE -->
-    <main>
+    <!-- HOOFDINHOUD -->
+    <main class="hoofd-inhoud">
 
-        <!-- WELKOM -->
-        <section class="welkom">
+        <!-- START -->
+        <section id="pagina-welkom" class="pagina welkom actief">
 
             <div
                 id="welkom-avatar"
@@ -69,7 +109,7 @@
 
 
         <!-- LESSEN -->
-        <section>
+        <section id="pagina-lessen" class="pagina">
 
             <div class="section-title">
 
@@ -91,7 +131,7 @@
 
 
         <!-- HOBBY'S -->
-        <section>
+        <section id="pagina-hobbies" class="pagina">
 
             <div class="section-title">
 
@@ -112,8 +152,8 @@
         </section>
 
 
-        <!-- PLANNING (taken + hobby-blokken gecombineerd) -->
-        <section>
+        <!-- PLANNING -->
+        <section id="pagina-planning" class="pagina">
 
             <div class="section-title">
 
@@ -135,7 +175,7 @@
 
 
         <!-- SCHOOLKALENDER -->
-        <section>
+        <section id="pagina-kalender" class="pagina">
 
             <h2>📅 Schoolkalender 2026-2027</h2>
 
@@ -150,6 +190,8 @@
         </section>
 
     </main>
+
+    </div><!-- /portaal-layout -->
 
 
     <!-- KALENDER EVENT POPUP -->
