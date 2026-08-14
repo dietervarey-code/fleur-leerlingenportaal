@@ -23,9 +23,20 @@
     <header>
         <h1>🎓 Mijn Portaal</h1>
 
-        <button onclick="openSettings()">
-            ⚙️ Instellingen
-        </button>
+        <div class="header-acties">
+
+            <div
+                class="profiel-avatar-klein"
+                id="header-avatar"
+                onclick="openSettings()"
+                title="Profielfoto — klik voor instellingen">
+            </div>
+
+            <button onclick="openSettings()">
+                ⚙️ Instellingen
+            </button>
+
+        </div>
     </header>
 
 
@@ -461,6 +472,35 @@
             <h2>
                 ⚙️ Instellingen
             </h2>
+
+
+            <!-- PROFIEL FOTO -->
+
+            <div class="profiel-sectie">
+
+                <div
+                    class="profiel-avatar"
+                    id="settings-avatar"
+                    onclick="kiesProfielFoto()"
+                    title="Klik om een foto te maken of te kiezen">
+                    <span id="profiel-placeholder">📷</span>
+                </div>
+
+                <p class="profiel-uitleg">
+                    Klik op de cirkel om een selfie te maken<br>
+                    of een foto van je telefoon te kiezen
+                </p>
+
+            </div>
+
+            <input
+                type="file"
+                id="profiel-foto-invoer"
+                accept="image/*"
+                style="display:none"
+                onchange="verwerkProfielFoto(this.files[0])">
+
+            <hr class="instellingen-scheiding">
 
 
             <!-- AANMELDEN -->

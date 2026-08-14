@@ -2621,7 +2621,7 @@ localStorage.setItem = function(sleutel, waarde) {
         const syncSleutels = [
             "lessen", "taken", "hobbies",
             "overgeslagen", "achtergrond", "menuKleur",
-            "evenementen"
+            "evenementen", "profielfoto"
         ];
 
         if (syncSleutels.includes(sleutel)) {
@@ -2659,6 +2659,7 @@ function initSupabase() {
                     toonHobbies();
                     toonTaken();
                     laadKleuren();
+                    laadProfielFoto();
 
                     const heeftLopende =
                         taken.some(function(t) {
@@ -2798,6 +2799,7 @@ function syncNaarCloud() {
             evenementen:  JSON.parse(localStorage.getItem("evenementen")  || "{}"),
             achtergrond:  localStorage.getItem("achtergrond")  || "#eef4ff",
             menuKleur:    localStorage.getItem("menuKleur")    || "#ffffff",
+            profielfoto:  localStorage.getItem("profielfoto")  || null,
             bijgewerkt:   new Date().toISOString()
         };
 
@@ -2907,7 +2909,182 @@ function pasCloudDataToe(data) {
         _origSetItem("menuKleur", data.menuKleur);
     }
 
+    if (data.profielfoto) {
+        _origSetItem("profielfoto", data.profielfoto);
+        toonProfielFoto(data.profielfoto);
+    }
+
     _isLadenVanCloud = false;
+
+}
+
+
+/* ========================================
+   PROFIELFOTO
+======================================== */
+
+function laadProfielFoto() {
+
+    const opgeslagen =
+        localStorage.getItem("profielfoto");
+
+    if (opgeslagen) {
+        toonProfielFoto(opgeslagen);
+    }
+
+}
+
+
+function kiesProfielFoto() {
+
+    const invoer =
+        document.getElementById("profiel-foto-invoer");
+
+    if (invoer) {
+        invoer.value = "";   // reset zodat dezelfde foto opnieuw gekozen kan worden
+        invoer.click();
+    }
+
+}
+
+
+function verwerkProfielFoto(bestand) {
+
+    if (!bestand) return;
+
+    const lezer = new FileReader();
+
+    lezer.onload = function(e) {
+
+        const afbeelding = new Image();
+
+        afbeelding.onload = function() {
+
+            // Bijsnijden tot vierkant en verkleinen naar 240×240
+            const canvas =
+                document.createElement("canvas");
+
+            canvas.width  = 240;
+            canvas.height = 240;
+
+            const ctx = canvas.getContext("2d");
+
+            // Cirkel uitknippen
+            ctx.beginPath();
+            ctx.arc(120, 120, 120, 0, Math.PI * 2);
+            ctx.clip();
+
+            const grootte =
+                Math.min(afbeelding.width, afbeelding.height);
+
+            const sx =
+                (afbeelding.width  - grootte) / 2;
+
+            const sy =
+                (afbeelding.height - grootte) / 2;
+
+            ctx.drawImage(
+                afbeelding,
+                sx, sy, grootte, grootte,
+                0, 0, 240, 240
+            );
+
+            const dataUrl =
+                canvas.toDataURL("image/jpeg", 0.80);
+
+
+            _origSetItem("profielfoto", dataUrl);
+
+            toonProfielFoto(dataUrl);
+
+            if (currentUser) {
+                syncNaarCloud();
+            }
+
+        };
+
+        afbeelding.src = e.target.result;
+
+    };
+
+    lezer.readAsDataURL(bestand);
+
+}
+
+
+function toonProfielFoto(dataUrl) {
+
+    // Klein avatar in de header
+    const headerAvatar =
+        document.getElementById("header-avatar");
+
+    if (headerAvatar) {
+
+        headerAvatar.style.backgroundImage =
+            "url('" + dataUrl + "')";
+
+        headerAvatar.textContent = "";
+        headerAvatar.classList.add("heeft-foto");
+
+    }
+
+
+    // Groot avatar in de instellingen
+    const settingsAvatar =
+        document.getElementById("settings-avatar");
+
+    if (settingsAvatar) {
+
+        settingsAvatar.style.backgroundImage =
+            "url('" + dataUrl + "')";
+
+        settingsAvatar.classList.add("heeft-foto");
+
+        const placeholder =
+            document.getElementById("profiel-placeholder");
+
+        if (placeholder) {
+            placeholder.style.display = "none";
+        }
+
+    }
+
+}
+
+
+function verwijderProfielFoto() {
+
+    localStorage.removeItem("profielfoto");
+
+    const headerAvatar =
+        document.getElementById("header-avatar");
+
+    if (headerAvatar) {
+        headerAvatar.style.backgroundImage = "";
+        headerAvatar.textContent = "";
+        headerAvatar.classList.remove("heeft-foto");
+    }
+
+
+    const settingsAvatar =
+        document.getElementById("settings-avatar");
+
+    if (settingsAvatar) {
+        settingsAvatar.style.backgroundImage = "";
+        settingsAvatar.classList.remove("heeft-foto");
+
+        const placeholder =
+            document.getElementById("profiel-placeholder");
+
+        if (placeholder) {
+            placeholder.style.display = "";
+        }
+    }
+
+
+    if (currentUser) {
+        syncNaarCloud();
+    }
 
 }
 
@@ -3416,6 +3593,9 @@ window.onload =
 
         // Slepen activeren
         initSlepenTaken();
+
+        // Profielfoto laden
+        laadProfielFoto();
 
 
         // Herstart interval als er lopende timers zijn
