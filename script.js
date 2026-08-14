@@ -2548,7 +2548,7 @@ function toonKalender() {
     const dagNamen =
         ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
 
-    // Schooljaar: september 2026 t/m juni 2027
+    // Volledig schooljaar: september 2026 t/m augustus 2027
     const schoolMaanden = [
         { jaar: 2026, maand: 9  },
         { jaar: 2026, maand: 10 },
@@ -2559,7 +2559,9 @@ function toonKalender() {
         { jaar: 2027, maand: 3  },
         { jaar: 2027, maand: 4  },
         { jaar: 2027, maand: 5  },
-        { jaar: 2027, maand: 6  }
+        { jaar: 2027, maand: 6  },
+        { jaar: 2027, maand: 7  },
+        { jaar: 2027, maand: 8  }
     ];
 
 
