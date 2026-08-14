@@ -1234,50 +1234,75 @@ section {
 
 }
 
-.google-knop {
+.login-knoppen {
 
     display:
         flex;
 
-    align-items:
-        center;
-
     gap:
-        8px;
+        10px;
+
+    margin-top:
+        12px;
+
+    flex-wrap:
+        wrap;
+
+}
+
+
+.aanmeld-knop {
+
+    flex:
+        1;
 
     background:
-        #4285f4;
+        #4a90e2;
 
     color:
         white;
 
-    border:
-        none;
-
-    border-radius:
-        24px;
+    font-weight:
+        bold;
 
     padding:
-        10px 20px;
+        12px;
 
-    font-size:
-        15px;
+}
+
+.aanmeld-knop:hover {
+
+    background:
+        #357abd;
+    opacity: 1;
+
+}
+
+
+.registreer-knop {
+
+    flex:
+        1;
+
+    background:
+        #e8f5e9;
+
+    color:
+        #2e7d32;
 
     font-weight:
         bold;
 
-    cursor:
-        pointer;
-
-    transition:
-        background 0.2s;
+    padding:
+        12px;
 
 }
 
-.google-knop:hover {
+.registreer-knop:hover {
 
     background:
-        #2f6dd4;
+        #c8e6c9;
+    opacity: 1;
 
 }
 

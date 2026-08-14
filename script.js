@@ -2063,14 +2063,13 @@ function laadKleuren() {
 
 
 /* ========================================
-   FIREBASE SYNC MET GOOGLE LOGIN
+   SUPABASE SYNC MET E-MAIL LOGIN
 ======================================== */
 
-let db          = null;
-let auth        = null;
-let currentUser = null;
-let _syncTimeout      = null;
-let _isLadenVanCloud  = false;
+let supabaseClient   = null;
+let currentUser      = null;
+let _syncTimeout     = null;
+let _isLadenVanCloud = false;
 
 
 // Intercept localStorage.setItem voor automatische cloud-sync
@@ -2097,35 +2096,27 @@ localStorage.setItem = function(sleutel, waarde) {
 };
 
 
-function initFirebase() {
+function initSupabase() {
 
-    if (
-        !window.firebaseConfig ||
-        firebaseConfig.apiKey === "VERVANG-MET-JOUW-API-KEY"
-    ) {
-        return; // Nog niet geconfigureerd
+    if (typeof supabase === "undefined") {
+        console.warn("Supabase SDK niet geladen");
+        return;
     }
 
-    try {
-
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-
-        db   = firebase.firestore();
-        auth = firebase.auth();
+    supabaseClient =
+        supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 
-        // Luister naar login/logout
-        auth.onAuthStateChanged(function(user) {
+    // Luister naar login/logout
+    supabaseClient.auth.onAuthStateChange(
+        function(event, session) {
 
-            currentUser = user;
+            currentUser = session ? session.user : null;
 
-            toonAanmeldStatus(user);
+            toonAanmeldStatus(currentUser);
 
-            if (user) {
+            if (currentUser) {
 
-                // Gegevens laden vanuit cloud
                 laadVanCloud(function() {
                     toonLessen();
                     toonHobbies();
@@ -2145,32 +2136,101 @@ function initFirebase() {
 
             }
 
-        });
-
-    } catch (e) {
-        console.error("Firebase fout:", e);
-    }
+        }
+    );
 
 }
 
 
 function aanmelden() {
 
-    if (!auth) {
+    const email =
+        document.getElementById("login-email").value.trim();
+
+    const wachtwoord =
+        document.getElementById("login-wachtwoord").value;
+
+
+    if (!email || !wachtwoord) {
         toonSyncStatus(
-            "⚠ Firebase nog niet geconfigureerd",
+            "⚠ Vul je e-mail en wachtwoord in",
             "#e74c3c"
         );
         return;
     }
 
-    const provider =
-        new firebase.auth.GoogleAuthProvider();
+    if (!supabaseClient) {
+        toonSyncStatus(
+            "⚠ Supabase niet geconfigureerd",
+            "#e74c3c"
+        );
+        return;
+    }
 
-    auth.signInWithPopup(provider)
-        .catch(function(err) {
-            toonSyncStatus("⚠ Aanmelden mislukt", "#e74c3c");
-            console.error(err);
+    toonSyncStatus("⏳ Aanmelden…", "#f39c12");
+
+    supabaseClient.auth
+        .signInWithPassword({ email: email, password: wachtwoord })
+        .then(function(result) {
+
+            if (result.error) {
+                toonSyncStatus(
+                    "⚠ Fout: " + result.error.message,
+                    "#e74c3c"
+                );
+            }
+            // onAuthStateChange verwerkt de rest
+
+        });
+
+}
+
+
+function registreren() {
+
+    const email =
+        document.getElementById("login-email").value.trim();
+
+    const wachtwoord =
+        document.getElementById("login-wachtwoord").value;
+
+
+    if (!email || !wachtwoord) {
+        toonSyncStatus(
+            "⚠ Vul je e-mail en wachtwoord in",
+            "#e74c3c"
+        );
+        return;
+    }
+
+    if (wachtwoord.length < 6) {
+        toonSyncStatus(
+            "⚠ Wachtwoord: minstens 6 tekens",
+            "#e74c3c"
+        );
+        return;
+    }
+
+    toonSyncStatus("⏳ Account aanmaken…", "#f39c12");
+
+    supabaseClient.auth
+        .signUp({ email: email, password: wachtwoord })
+        .then(function(result) {
+
+            if (result.error) {
+                toonSyncStatus(
+                    "⚠ Fout: " + result.error.message,
+                    "#e74c3c"
+                );
+            } else if (result.data.user && !result.data.session) {
+                // E-mailbevestiging vereist
+                toonSyncStatus(
+                    "📧 Check je e-mail om te bevestigen",
+                    "#27ae60"
+                );
+            }
+            // Als session bestaat: onAuthStateChange verwerkt de rest
+
         });
 
 }
@@ -2178,28 +2238,16 @@ function aanmelden() {
 
 function afmelden() {
 
-    if (auth) {
-        auth.signOut();
+    if (supabaseClient) {
+        supabaseClient.auth.signOut();
     }
-
-}
-
-
-function getDocRef() {
-
-    if (!db || !currentUser) return null;
-
-    return db
-        .collection("portalen")
-        .doc(currentUser.uid);
 
 }
 
 
 function syncNaarCloud() {
 
-    const ref = getDocRef();
-    if (!ref) return;
+    if (!supabaseClient || !currentUser) return;
 
     clearTimeout(_syncTimeout);
 
@@ -2210,19 +2258,31 @@ function syncNaarCloud() {
             taken:        JSON.parse(localStorage.getItem("taken")        || "[]"),
             hobbies:      JSON.parse(localStorage.getItem("hobbies")      || "[]"),
             overgeslagen: JSON.parse(localStorage.getItem("overgeslagen") || '{"week":"","ids":[]}'),
-            evenementen:  JSON.parse(localStorage.getItem("evenementen") || "{}"),
+            evenementen:  JSON.parse(localStorage.getItem("evenementen")  || "{}"),
             achtergrond:  localStorage.getItem("achtergrond")  || "#eef4ff",
             menuKleur:    localStorage.getItem("menuKleur")    || "#ffffff",
             bijgewerkt:   new Date().toISOString()
         };
 
-        ref.set(data)
-            .then(function() {
-                toonSyncStatus("✓ Opgeslagen in cloud", "#27ae60");
-            })
-            .catch(function(err) {
-                toonSyncStatus("⚠ Sync mislukt", "#e74c3c");
-                console.error(err);
+        supabaseClient
+            .from("portalen")
+            .upsert(
+                {
+                    user_id:     currentUser.id,
+                    data:        data,
+                    updated_at:  new Date().toISOString()
+                },
+                { onConflict: "user_id" }
+            )
+            .then(function(result) {
+
+                if (result.error) {
+                    toonSyncStatus("⚠ Sync mislukt", "#e74c3c");
+                    console.error(result.error);
+                } else {
+                    toonSyncStatus("✓ Opgeslagen in cloud", "#27ae60");
+                }
+
             });
 
     }, 800);
@@ -2232,21 +2292,28 @@ function syncNaarCloud() {
 
 function laadVanCloud(callback) {
 
-    const ref = getDocRef();
-
-    if (!ref) {
+    if (!supabaseClient || !currentUser) {
         callback && callback();
         return;
     }
 
     toonSyncStatus("⏳ Gegevens laden…", "#f39c12");
 
-    ref.get()
-        .then(function(doc) {
+    supabaseClient
+        .from("portalen")
+        .select("data")
+        .eq("user_id", currentUser.id)
+        .single()
+        .then(function(result) {
 
-            if (doc.exists) {
+            if (result.error && result.error.code !== "PGRST116") {
 
-                pasCloudDataToe(doc.data());
+                toonSyncStatus("⚠ Kan niet verbinden", "#e74c3c");
+                console.error(result.error);
+
+            } else if (result.data && result.data.data) {
+
+                pasCloudDataToe(result.data.data);
                 toonSyncStatus("✓ Gesynchroniseerd", "#27ae60");
 
             } else {
@@ -2259,11 +2326,6 @@ function laadVanCloud(callback) {
 
             callback && callback();
 
-        })
-        .catch(function(err) {
-            toonSyncStatus("⚠ Kan niet verbinden", "#e74c3c");
-            console.error(err);
-            callback && callback();
         });
 
 }
@@ -2329,8 +2391,7 @@ function toonAanmeldStatus(user) {
 
         if (afgesloten) afgesloten.style.display = "none";
         if (aangemeld)  aangemeld.style.display  = "block";
-        if (naamEl)     naamEl.textContent =
-            user.displayName || user.email;
+        if (naamEl)     naamEl.textContent = user.email;
 
     } else {
 
@@ -2721,8 +2782,8 @@ window.onload =
 
         toonSchoolStatus();
 
-        // Firebase starten (laadt cloud-data via onAuthStateChanged)
-        initFirebase();
+        // Supabase starten (laadt cloud-data via onAuthStateChange)
+        initSupabase();
 
         // Eerste render met lokale data (direct zichtbaar)
         toonLessen();
