@@ -2960,20 +2960,16 @@ function verwerkProfielFoto(bestand) {
 
         afbeelding.onload = function() {
 
-            // Bijsnijden tot vierkant en verkleinen naar 240×240
+            // Bijsnijden tot vierkant en verkleinen naar 300×300
             const canvas =
                 document.createElement("canvas");
 
-            canvas.width  = 240;
-            canvas.height = 240;
+            canvas.width  = 300;
+            canvas.height = 300;
 
             const ctx = canvas.getContext("2d");
 
-            // Cirkel uitknippen
-            ctx.beginPath();
-            ctx.arc(120, 120, 120, 0, Math.PI * 2);
-            ctx.clip();
-
+            // Centraal bijsnijden (square crop)
             const grootte =
                 Math.min(afbeelding.width, afbeelding.height);
 
@@ -2986,11 +2982,12 @@ function verwerkProfielFoto(bestand) {
             ctx.drawImage(
                 afbeelding,
                 sx, sy, grootte, grootte,
-                0, 0, 240, 240
+                0, 0, 300, 300
             );
 
+            // PNG: transparantie behouden (geen zwarte hoeken bij JPEG)
             const dataUrl =
-                canvas.toDataURL("image/jpeg", 0.80);
+                canvas.toDataURL("image/png");
 
 
             _origSetItem("profielfoto", dataUrl);
@@ -3029,6 +3026,21 @@ function toonProfielFoto(dataUrl) {
     }
 
 
+    // Groot welkom-avatar op de hoofdpagina
+    const welkomAvatar =
+        document.getElementById("welkom-avatar");
+
+    if (welkomAvatar) {
+
+        welkomAvatar.style.backgroundImage =
+            "url('" + dataUrl + "')";
+
+        welkomAvatar.textContent = "";
+        welkomAvatar.classList.add("heeft-foto");
+
+    }
+
+
     // Groot avatar in de instellingen
     const settingsAvatar =
         document.getElementById("settings-avatar");
@@ -3061,8 +3073,18 @@ function verwijderProfielFoto() {
 
     if (headerAvatar) {
         headerAvatar.style.backgroundImage = "";
-        headerAvatar.textContent = "";
+        headerAvatar.textContent = "👤";
         headerAvatar.classList.remove("heeft-foto");
+    }
+
+
+    const welkomAvatar =
+        document.getElementById("welkom-avatar");
+
+    if (welkomAvatar) {
+        welkomAvatar.style.backgroundImage = "";
+        welkomAvatar.textContent = "👤";
+        welkomAvatar.classList.remove("heeft-foto");
     }
 
 
