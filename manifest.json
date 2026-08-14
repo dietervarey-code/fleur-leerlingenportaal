@@ -1,0 +1,22 @@
+{
+    "name": "Fleur's Portaal",
+    "short_name": "Portaal",
+    "description": "Mijn persoonlijk schoolportaal",
+    "start_url": "./",
+    "scope": "./",
+    "display": "standalone",
+    "background_color": "#eef4ff",
+    "theme_color": "#4a90e2",
+    "orientation": "portrait-primary",
+    "lang": "nl",
+    "icons": [
+        {
+            "src": "icons/icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any"
+        }
+    ],
+    "screenshots": [],
+    "categories": ["education", "productivity"]
+}
