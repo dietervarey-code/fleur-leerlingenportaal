@@ -124,6 +124,44 @@
     </main>
 
 
+    <!-- KALENDER EVENT POPUP -->
+    <div id="event-popup" class="popup">
+
+        <div class="popup-content">
+
+            <button
+                class="close"
+                onclick="sluitEventPopup()">
+                ✖
+            </button>
+
+            <h2 id="event-popup-datum">📅</h2>
+
+            <div id="event-lijst"></div>
+
+            <div class="event-invoer-rij">
+
+                <input
+                    type="text"
+                    id="event-invoer"
+                    class="tekst-invoer"
+                    placeholder="bv. Verjaardag mama"
+                    onkeydown="if(event.key==='Enter') voegEventToe()"
+                >
+
+                <button
+                    class="sync-knop"
+                    onclick="voegEventToe()">
+                    +
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
     <!-- HOBBY TOEVOEGEN POPUP -->
     <div id="hobby-popup" class="popup">
 

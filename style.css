@@ -1071,6 +1071,148 @@ section {
 
 }
 
+.kalender-dag.klikbaar {
+
+    cursor:
+        pointer;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    align-items:
+        center;
+
+    gap:
+        2px;
+
+}
+
+.kalender-dag.klikbaar:hover {
+
+    background-color:
+        rgba(74, 144, 226, 0.12);
+
+    border-radius:
+        6px;
+
+}
+
+.kalender-dag.vandaag:hover {
+
+    background-color:
+        #357abd;
+
+}
+
+.dag-nr {
+
+    line-height:
+        1.4;
+
+}
+
+.event-stip {
+
+    width:
+        5px;
+
+    height:
+        5px;
+
+    border-radius:
+        50%;
+
+    background-color:
+        #e74c3c;
+
+    flex-shrink:
+        0;
+
+}
+
+.kalender-dag.vakantie .event-stip {
+
+    background-color:
+        #c0392b;
+
+}
+
+.kalender-dag.vandaag .event-stip {
+
+    background-color:
+        white;
+
+}
+
+
+/* ========================================
+   KALENDER EVENT POPUP
+======================================== */
+
+.event-invoer-rij {
+
+    display:
+        flex;
+
+    gap:
+        8px;
+
+    align-items:
+        center;
+
+    margin-top:
+        12px;
+
+}
+
+.event-invoer-rij .tekst-invoer {
+
+    flex:
+        1;
+
+}
+
+.event-item {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    padding:
+        10px 12px;
+
+    margin-top:
+        8px;
+
+    border-radius:
+        12px;
+
+    background:
+        rgba(0, 0, 0, 0.04);
+
+    gap:
+        8px;
+
+}
+
+.event-tekst {
+
+    flex:
+        1;
+
+    font-size:
+        15px;
+
+}
+
 
 /* ========================================
    SYNC / LOGIN UI

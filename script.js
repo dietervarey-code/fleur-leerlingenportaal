@@ -1059,6 +1059,15 @@ let hobbies =
     ) || [];
 
 
+let evenementen =
+    JSON.parse(
+        localStorage.getItem("evenementen")
+    ) || {};
+
+
+let huidigKalenderDag = null;
+
+
 const DAGKORTE =
     ["zo", "ma", "di", "wo", "do", "vr", "za"];
 
@@ -2075,7 +2084,8 @@ localStorage.setItem = function(sleutel, waarde) {
 
         const syncSleutels = [
             "lessen", "taken", "hobbies",
-            "overgeslagen", "achtergrond", "menuKleur"
+            "overgeslagen", "achtergrond", "menuKleur",
+            "evenementen"
         ];
 
         if (syncSleutels.includes(sleutel)) {
@@ -2200,6 +2210,7 @@ function syncNaarCloud() {
             taken:        JSON.parse(localStorage.getItem("taken")        || "[]"),
             hobbies:      JSON.parse(localStorage.getItem("hobbies")      || "[]"),
             overgeslagen: JSON.parse(localStorage.getItem("overgeslagen") || '{"week":"","ids":[]}'),
+            evenementen:  JSON.parse(localStorage.getItem("evenementen") || "{}"),
             achtergrond:  localStorage.getItem("achtergrond")  || "#eef4ff",
             menuKleur:    localStorage.getItem("menuKleur")    || "#ffffff",
             bijgewerkt:   new Date().toISOString()
@@ -2284,6 +2295,11 @@ function pasCloudDataToe(data) {
         );
     }
 
+    if (data.evenementen) {
+        evenementen = data.evenementen;
+        _origSetItem("evenementen", JSON.stringify(evenementen));
+    }
+
     if (data.achtergrond) {
         _origSetItem("achtergrond", data.achtergrond);
     }
@@ -2343,6 +2359,168 @@ function toonSyncStatus(tekst, kleur) {
             el.textContent = "";
         }
     }, 5000);
+
+}
+
+
+/* ========================================
+   KALENDER AFSPRAKEN
+======================================== */
+
+function kiesKalenderDag(dagStr) {
+
+    huidigKalenderDag = dagStr;
+
+    const [j, ma, d] =
+        dagStr.split("-").map(Number);
+
+    const dagDatum =
+        new Date(j, ma - 1, d);
+
+    const label =
+        dagDatum.toLocaleDateString("nl-BE", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric"
+        });
+
+
+    document.getElementById(
+        "event-popup-datum"
+    ).textContent = "📅 " + label;
+
+    document.getElementById(
+        "event-invoer"
+    ).value = "";
+
+    toonEventLijst();
+
+    document.getElementById(
+        "event-popup"
+    ).style.display = "flex";
+
+    setTimeout(function() {
+        document.getElementById(
+            "event-invoer"
+        ).focus();
+    }, 100);
+
+}
+
+
+function toonEventLijst() {
+
+    const lijst =
+        document.getElementById("event-lijst");
+
+    if (!lijst) return;
+
+
+    const events =
+        evenementen[huidigKalenderDag] || [];
+
+    lijst.innerHTML = "";
+
+
+    if (events.length === 0) {
+
+        lijst.innerHTML =
+            `<p class="leeg">
+                Geen afspraken voor deze dag.
+            </p>`;
+
+        return;
+
+    }
+
+
+    events.forEach(function(event, index) {
+
+        lijst.innerHTML += `
+
+            <div class="event-item">
+
+                <span class="event-tekst">
+                    ${event}
+                </span>
+
+                <button
+                    class="verwijder"
+                    onclick="verwijderEvent(${index})">
+                    🗑️
+                </button>
+
+            </div>
+
+        `;
+
+    });
+
+}
+
+
+function voegEventToe() {
+
+    const invoer =
+        document.getElementById("event-invoer");
+
+    const tekst = invoer.value.trim();
+
+    if (!tekst) return;
+
+
+    if (!evenementen[huidigKalenderDag]) {
+        evenementen[huidigKalenderDag] = [];
+    }
+
+    evenementen[huidigKalenderDag].push(tekst);
+
+
+    localStorage.setItem(
+        "evenementen",
+        JSON.stringify(evenementen)
+    );
+
+
+    invoer.value = "";
+
+    toonEventLijst();
+    toonKalender();
+
+}
+
+
+function verwijderEvent(index) {
+
+    if (!evenementen[huidigKalenderDag]) return;
+
+    evenementen[huidigKalenderDag].splice(index, 1);
+
+    if (evenementen[huidigKalenderDag].length === 0) {
+        delete evenementen[huidigKalenderDag];
+    }
+
+
+    localStorage.setItem(
+        "evenementen",
+        JSON.stringify(evenementen)
+    );
+
+
+    toonEventLijst();
+    toonKalender();
+
+}
+
+
+function sluitEventPopup() {
+
+    document.getElementById(
+        "event-popup"
+    ).style.display = "none";
+
+    huidigKalenderDag = null;
 
 }
 
@@ -2456,8 +2634,25 @@ function toonKalender() {
             const cel =
                 document.createElement("div");
 
-            cel.className = "kalender-dag";
-            cel.textContent = d;
+            cel.className = "kalender-dag klikbaar";
+
+            const dagEvents =
+                evenementen[dagStr] || [];
+
+            cel.innerHTML =
+                `<span class="dag-nr">${d}</span>` +
+                (dagEvents.length > 0
+                    ? `<span class="event-stip"></span>`
+                    : "");
+
+            cel.addEventListener(
+                "click",
+                (function(ds) {
+                    return function() {
+                        kiesKalenderDag(ds);
+                    };
+                })(dagStr)
+            );
 
 
             // Weekend
