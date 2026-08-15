@@ -4046,9 +4046,60 @@ function toonPagina(paginaId) {
     // Scroll naar boven
     window.scrollTo(0, 0);
 
+    // Sluit hamburgermenu (op mobiel)
+    sluitHamburger();
+
     // Pagina-specifieke acties
     if (paginaId === "chat") {
         toonChatStatus();
+    }
+
+}
+
+
+/* ========================================
+   HAMBURGER MENU (mobiel)
+======================================== */
+
+function toggleHamburger() {
+
+    const zijbalk =
+        document.querySelector(".zijbalk");
+
+    const overlay =
+        document.getElementById("menu-overlay");
+
+    const icoon =
+        document.getElementById("hamburger-icoon");
+
+    const isOpen =
+        zijbalk.classList.toggle("open");
+
+    overlay.classList.toggle("zichtbaar", isOpen);
+
+    if (icoon) {
+        icoon.textContent = isOpen ? "✕" : "☰";
+    }
+
+}
+
+
+function sluitHamburger() {
+
+    const zijbalk =
+        document.querySelector(".zijbalk");
+
+    const overlay =
+        document.getElementById("menu-overlay");
+
+    const icoon =
+        document.getElementById("hamburger-icoon");
+
+    zijbalk.classList.remove("open");
+    overlay.classList.remove("zichtbaar");
+
+    if (icoon) {
+        icoon.textContent = "☰";
     }
 
 }

@@ -303,7 +303,7 @@ section.pagina.actief {
 
 
 /* ========================================
-   MOBIELE ONDERBALK
+   MOBIEL HAMBURGER MENU
 ======================================== */
 
 @media (max-width: 768px) {
@@ -321,7 +321,7 @@ section.pagina.actief {
             space-between;
 
         padding:
-            12px 16px;
+            10px 12px;
 
         background-color:
             var(--menu-kleur);
@@ -356,26 +356,72 @@ section.pagina.actief {
             0;
 
         font-size:
-            18px;
+            17px;
+
+        flex:
+            1;
+
+        text-align:
+            center;
 
     }
 
 
-    .mobiel-header button {
+    /* Hamburger-knop (☰ / ✕) */
+    .hamburger-knop {
+
+        font-size:
+            26px;
+
+        line-height:
+            1;
+
+        padding:
+            4px 8px;
+
+        background:
+            none;
+
+        border-radius:
+            8px;
+
+        flex-shrink:
+            0;
+
+        min-width:
+            40px;
+
+    }
+
+
+    /* Instellingen-knop rechts in de header */
+    .mobiel-instellingen-knop {
 
         font-size:
             22px;
 
         padding:
-            6px 10px;
+            4px 8px;
 
         background:
             none;
 
+        border-radius:
+            8px;
+
+        flex-shrink:
+            0;
+
+        min-width:
+            40px;
+
+        text-align:
+            right;
+
     }
 
 
-    /* Zijbalk wordt onderbalk */
+    /* Layout: normaal blok op mobiel */
     #portaal-layout {
 
         flex-direction:
@@ -387,97 +433,126 @@ section.pagina.actief {
     }
 
 
+    /* Zijbalk: slide-in drawer van links */
     .zijbalk {
 
         position:
             fixed;
 
+        top:
+            58px;
+
+        left:
+            -260px;
+
         bottom:
             0;
 
-        left:
-            0;
-
-        right:
-            0;
-
         width:
-            100%;
+            240px;
 
         height:
             auto;
 
         flex-direction:
-            row;
+            column;
 
         box-shadow:
-            0 -2px 10px rgba(0, 0, 0, 0.10);
+            4px 0 24px rgba(0, 0, 0, 0.18);
 
         border-radius:
-            16px 16px 0 0;
+            0;
 
         padding-bottom:
             env(safe-area-inset-bottom, 0px);
 
+        transition:
+            left 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+            background-color 0.3s ease;
+
+        z-index:
+            160;
+
+        overflow-y:
+            auto;
+
     }
 
 
+    /* Drawer open toestand */
+    .zijbalk.open {
+
+        left:
+            0;
+
+    }
+
+
+    /* Zijbalk-header terug zichtbaar in de drawer */
     .zijbalk-header {
 
         display:
-            none;
-
-    }
-
-
-    .zijbalk-nav {
-
-        flex-direction:
-            row;
-
-        flex:
-            1;
+            flex;
 
         padding:
-            4px 2px;
-
-        gap:
-            0;
-
-        align-items:
-            center;
+            16px 16px 12px;
 
     }
 
 
-    .nav-item {
-
-        flex:
-            1;
+    /* Nav terug verticaal */
+    .zijbalk-nav {
 
         flex-direction:
             column;
 
+        flex:
+            1;
+
         padding:
-            6px 4px;
+            8px 10px;
 
         gap:
             2px;
 
-        font-size:
-            10px;
+        align-items:
+            stretch;
+
+    }
+
+
+    /* Nav-items: volle breedte, horizontaal */
+    .nav-item {
+
+        flex:
+            none;
+
+        flex-direction:
+            row;
 
         justify-content:
-            center;
+            flex-start;
 
         align-items:
             center;
 
+        padding:
+            11px 14px;
+
+        gap:
+            12px;
+
+        font-size:
+            15px;
+
         border-radius:
-            8px;
+            10px;
 
         color:
             inherit;
+
+        width:
+            100%;
 
     }
 
@@ -496,7 +571,7 @@ section.pagina.actief {
     .nav-icoon {
 
         font-size:
-            22px;
+            20px;
 
     }
 
@@ -504,22 +579,60 @@ section.pagina.actief {
     .nav-instellingen {
 
         margin-top:
-            0;
+            auto;
 
     }
 
 
-    /* Inhoud: ruimte voor vaste boven- en onderbalk */
+    /* Overlay achter de drawer */
+    .menu-overlay {
+
+        display:
+            none;
+
+        position:
+            fixed;
+
+        top:
+            58px;
+
+        left:
+            0;
+
+        right:
+            0;
+
+        bottom:
+            0;
+
+        background:
+            rgba(0, 0, 0, 0.35);
+
+        z-index:
+            150;
+
+    }
+
+
+    .menu-overlay.zichtbaar {
+
+        display:
+            block;
+
+    }
+
+
+    /* Inhoud: alleen ruimte voor bovenbalk */
     main.hoofd-inhoud {
 
         padding:
             16px;
 
         padding-top:
-            76px;
+            74px;
 
         padding-bottom:
-            90px;
+            24px;
 
         max-width:
             none;

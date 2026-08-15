@@ -21,9 +21,15 @@
 
     <!-- MOBIELE BOVENBALK (alleen zichtbaar op telefoon) -->
     <header class="mobiel-header">
+        <button class="hamburger-knop" id="hamburger-knop" onclick="toggleHamburger()" aria-label="Menu openen">
+            <span id="hamburger-icoon">☰</span>
+        </button>
         <h1>🎓 Mijn Portaal</h1>
-        <button onclick="openSettings()">⚙️</button>
+        <button class="mobiel-instellingen-knop" onclick="openSettings()" aria-label="Instellingen">⚙️</button>
     </header>
+
+    <!-- MENU OVERLAY (mobiel — klik om te sluiten) -->
+    <div id="menu-overlay" class="menu-overlay" onclick="sluitHamburger()"></div>
 
 
     <!-- APP LAYOUT: zijbalk + inhoud -->
