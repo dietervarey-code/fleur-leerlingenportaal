@@ -71,6 +71,11 @@
                 <span class="nav-label">Kalender</span>
             </button>
 
+            <button class="nav-item" data-pagina="chat" onclick="toonPagina('chat')">
+                <span class="nav-icoon">💬</span>
+                <span class="nav-label">Chat</span>
+            </button>
+
             <button class="nav-item nav-instellingen" onclick="openSettings()">
                 <span class="nav-icoon">⚙️</span>
                 <span class="nav-label">Instellingen</span>
@@ -190,6 +195,41 @@
             </div>
 
             <div id="kalender"></div>
+
+        </section>
+
+
+        <!-- CHAT -->
+        <section id="pagina-chat" class="pagina chat-pagina">
+
+            <h2>💬 Chatroom</h2>
+
+            <!-- Niet aangemeld -->
+            <div id="chat-aanmeld-melding" class="chat-aanmeld-melding" style="display:none">
+                <p>🔐 Je moet eerst aanmelden om te chatten.</p>
+                <button onclick="openSettings()">⚙️ Aanmelden via instellingen</button>
+            </div>
+
+            <!-- Berichten lijst -->
+            <div id="chat-berichten" class="chat-berichten"></div>
+
+            <!-- Invoer -->
+            <div id="chat-invoer-sectie" class="chat-invoer-sectie" style="display:none">
+                <input
+                    type="text"
+                    id="chat-invoer"
+                    class="tekst-invoer chat-tekst-invoer"
+                    placeholder="Typ een bericht..."
+                    maxlength="500"
+                    onkeydown="if(event.key==='Enter'&&!event.shiftKey){stuurChatBericht();event.preventDefault();}"
+                >
+                <button
+                    class="chat-stuur-knop"
+                    onclick="stuurChatBericht()"
+                    title="Versturen">
+                    ➤
+                </button>
+            </div>
 
         </section>
 

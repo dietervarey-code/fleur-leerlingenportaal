@@ -3083,6 +3083,386 @@ section {
 
 
 /* ========================================
+   CHAT
+======================================== */
+
+/* Chatpagina heeft andere layout dan gewone kaarten */
+section.chat-pagina {
+
+    display:
+        none;
+
+    flex-direction:
+        column;
+
+    gap:
+        12px;
+
+    padding:
+        24px;
+
+    height:
+        calc(100vh - 60px);
+
+    max-height:
+        700px;
+
+}
+
+
+section.chat-pagina.actief {
+
+    display:
+        flex;
+
+}
+
+
+/* Berichtenlijst */
+.chat-berichten {
+
+    flex:
+        1;
+
+    overflow-y:
+        auto;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        6px;
+
+    padding:
+        12px;
+
+    background-color:
+        rgba(0, 0, 0, 0.03);
+
+    border-radius:
+        14px;
+
+    scroll-behavior:
+        smooth;
+
+}
+
+
+/* Individueel bericht */
+.chat-bericht {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    max-width:
+        72%;
+
+    animation:
+        inSchuiven 0.2s ease;
+
+}
+
+
+@keyframes inSchuiven {
+
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+
+.chat-bericht.eigen {
+
+    align-self:
+        flex-end;
+
+    align-items:
+        flex-end;
+
+}
+
+
+.chat-bericht.ander {
+
+    align-self:
+        flex-start;
+
+    align-items:
+        flex-start;
+
+}
+
+
+/* Naam boven bericht van anderen */
+.chat-naam {
+
+    font-size:
+        12px;
+
+    font-weight:
+        bold;
+
+    color:
+        #4a90e2;
+
+    margin-bottom:
+        3px;
+
+    padding-left:
+        4px;
+
+}
+
+
+/* Berichtenbubbel */
+.chat-bubbel {
+
+    padding:
+        9px 14px;
+
+    font-size:
+        15px;
+
+    line-height:
+        1.45;
+
+    word-break:
+        break-word;
+
+    white-space:
+        pre-wrap;
+
+}
+
+
+.chat-bericht.eigen .chat-bubbel {
+
+    background-color:
+        #4a90e2;
+
+    color:
+        white;
+
+    border-radius:
+        16px 16px 4px 16px;
+
+}
+
+
+.chat-bericht.ander .chat-bubbel {
+
+    background-color:
+        white;
+
+    border-radius:
+        16px 16px 16px 4px;
+
+    box-shadow:
+        0 1px 4px rgba(0, 0, 0, 0.08);
+
+}
+
+
+/* Tijdstip */
+.chat-tijd {
+
+    font-size:
+        11px;
+
+    opacity:
+        0.50;
+
+    margin-top:
+        3px;
+
+    padding:
+        0 4px;
+
+}
+
+
+/* Invoerbalk onderaan */
+.chat-invoer-sectie {
+
+    display:
+        flex;
+
+    gap:
+        8px;
+
+    align-items:
+        center;
+
+    flex-shrink:
+        0;
+
+}
+
+
+.chat-tekst-invoer {
+
+    flex:
+        1;
+
+    margin:
+        0;
+
+}
+
+
+.chat-stuur-knop {
+
+    width:
+        46px;
+
+    height:
+        46px;
+
+    border-radius:
+        50%;
+
+    background-color:
+        #4a90e2;
+
+    color:
+        white;
+
+    font-size:
+        18px;
+
+    padding:
+        0;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    flex-shrink:
+        0;
+
+}
+
+
+.chat-stuur-knop:hover {
+
+    background-color:
+        #2a6dd9;
+
+    opacity:
+        1;
+
+    transform:
+        scale(1.06);
+
+}
+
+
+/* Status berichten in de lijst */
+.chat-laden,
+.chat-leeg,
+.chat-fout {
+
+    text-align:
+        center;
+
+    color:
+        #888;
+
+    font-size:
+        14px;
+
+    padding:
+        20px;
+
+    align-self:
+        center;
+
+}
+
+
+.chat-fout {
+
+    color:
+        #e74c3c;
+
+}
+
+
+/* Niet aangemeld melding */
+.chat-aanmeld-melding {
+
+    text-align:
+        center;
+
+    padding:
+        30px 20px;
+
+    color:
+        #666;
+
+    flex-shrink:
+        0;
+
+}
+
+
+.chat-aanmeld-melding p {
+
+    margin-bottom:
+        16px;
+
+    font-size:
+        16px;
+
+}
+
+
+/* Op mobiel: minder hoog zodat invoer niet achter onderbalk zit */
+@media (max-width: 768px) {
+
+    section.chat-pagina {
+
+        height:
+            auto;
+
+        max-height:
+            none;
+
+    }
+
+
+    .chat-berichten {
+
+        height:
+            55vh;
+
+        flex:
+            none;
+
+    }
+
+}
+
+
+/* ========================================
    TELEFOON (kleine extra aanpassingen)
 ======================================== */
 

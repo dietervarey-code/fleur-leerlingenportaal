@@ -2778,6 +2778,9 @@ function initSupabase() {
 
             toonAanmeldStatus(currentUser);
 
+            // Chat bijwerken bij login/logout
+            toonChatStatus();
+
             if (currentUser) {
 
                 laadVanCloud(function() {
@@ -3737,6 +3740,261 @@ function toonKalender() {
 
 
 /* ========================================
+   CHAT
+======================================== */
+
+let chatKanaal       = null;
+let chatGeladen      = false;
+
+
+/* HTML escapen zodat berichten nooit scripts kunnen injecteren */
+function escapeHtml(tekst) {
+
+    return String(tekst)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+
+}
+
+
+/* Toont of verbergt de chat-invoer afhankelijk van login */
+function toonChatStatus() {
+
+    const invoerSectie =
+        document.getElementById("chat-invoer-sectie");
+
+    const aanmeldMelding =
+        document.getElementById("chat-aanmeld-melding");
+
+    if (currentUser) {
+
+        if (invoerSectie)    invoerSectie.style.display    = "flex";
+        if (aanmeldMelding)  aanmeldMelding.style.display  = "none";
+
+        if (!chatGeladen) {
+            laadChatBerichten();
+            aboneerOpChat();
+            chatGeladen = true;
+        }
+
+    } else {
+
+        if (invoerSectie)    invoerSectie.style.display    = "none";
+        if (aanmeldMelding)  aanmeldMelding.style.display  = "block";
+
+    }
+
+}
+
+
+/* Haalt de laatste 80 berichten op uit Supabase */
+function laadChatBerichten() {
+
+    if (!supabaseClient) {
+        return;
+    }
+
+    const lijst =
+        document.getElementById("chat-berichten");
+
+    if (lijst) {
+        lijst.innerHTML =
+            "<p class='chat-laden'>⏳ Berichten laden…</p>";
+    }
+
+    supabaseClient
+        .from("berichten")
+        .select("*")
+        .order("aangemaakt_op", { ascending: true })
+        .limit(80)
+        .then(function(resultaat) {
+
+            if (!lijst) return;
+
+            if (resultaat.error) {
+
+                lijst.innerHTML =
+                    "<p class='chat-fout'>" +
+                    "⚠️ Chat niet beschikbaar. Zorg dat de 'berichten' tabel aangemaakt is in Supabase." +
+                    "</p>";
+
+                return;
+
+            }
+
+            lijst.innerHTML = "";
+
+            const berichten = resultaat.data || [];
+
+            if (berichten.length === 0) {
+
+                lijst.innerHTML =
+                    "<p class='chat-leeg'>Nog geen berichten. Zeg als eerste hallo! 👋</p>";
+
+            } else {
+
+                berichten.forEach(function(b) {
+                    voegChatBerichtToe(b, false);
+                });
+
+            }
+
+            scrollChatNaarOnder();
+
+        });
+
+}
+
+
+/* Voegt één bericht-element toe aan de lijst */
+function voegChatBerichtToe(b, nieuw) {
+
+    const lijst =
+        document.getElementById("chat-berichten");
+
+    if (!lijst) {
+        return;
+    }
+
+    // Verwijder "leeg" of "laden" placeholder
+    const placeholder =
+        lijst.querySelector(".chat-leeg, .chat-laden");
+
+    if (placeholder) {
+        placeholder.remove();
+    }
+
+    const isEigen =
+        currentUser && b.user_id === currentUser.id;
+
+    const tijd =
+        new Date(b.aangemaakt_op)
+            .toLocaleTimeString("nl-BE", {
+                hour:   "2-digit",
+                minute: "2-digit"
+            });
+
+    const div = document.createElement("div");
+    div.className =
+        "chat-bericht " + (isEigen ? "eigen" : "ander");
+
+    if (nieuw) {
+        div.classList.add("nieuw");
+    }
+
+    div.innerHTML =
+        (!isEigen
+            ? "<div class='chat-naam'>" +
+              escapeHtml(b.gebruikersnaam) +
+              "</div>"
+            : "") +
+        "<div class='chat-bubbel'>" +
+        escapeHtml(b.bericht) +
+        "</div>" +
+        "<div class='chat-tijd'>" + tijd + "</div>";
+
+    lijst.appendChild(div);
+
+}
+
+
+/* Scrollt de chatlijst naar het laatste bericht */
+function scrollChatNaarOnder() {
+
+    const lijst =
+        document.getElementById("chat-berichten");
+
+    if (lijst) {
+        lijst.scrollTop = lijst.scrollHeight;
+    }
+
+}
+
+
+/* Verstuurt een nieuw bericht naar Supabase */
+function stuurChatBericht() {
+
+    if (!supabaseClient || !currentUser) {
+        return;
+    }
+
+    const invoer =
+        document.getElementById("chat-invoer");
+
+    const tekst =
+        invoer ? invoer.value.trim() : "";
+
+    if (!tekst) {
+        return;
+    }
+
+    // Gebruikersnaam: deel voor @ in het e-mailadres
+    const naam =
+        currentUser.email.split("@")[0];
+
+    invoer.value = "";
+    invoer.focus();
+
+    supabaseClient
+        .from("berichten")
+        .insert({
+            user_id:        currentUser.id,
+            gebruikersnaam: naam,
+            bericht:        tekst
+        })
+        .then(function(resultaat) {
+
+            if (resultaat.error) {
+
+                console.warn(
+                    "Bericht sturen mislukt:",
+                    resultaat.error
+                );
+
+            }
+
+        });
+
+}
+
+
+/* Abonneert op nieuwe berichten via Supabase Realtime */
+function aboneerOpChat() {
+
+    if (!supabaseClient) {
+        return;
+    }
+
+    // Verwijder eventueel oud kanaal
+    if (chatKanaal) {
+        supabaseClient.removeChannel(chatKanaal);
+    }
+
+    chatKanaal =
+        supabaseClient
+            .channel("publieke-chat")
+            .on(
+                "postgres_changes",
+                {
+                    event:  "INSERT",
+                    schema: "public",
+                    table:  "berichten"
+                },
+                function(payload) {
+
+                    voegChatBerichtToe(payload.new, true);
+                    scrollChatNaarOnder();
+
+                }
+            )
+            .subscribe();
+
+}
+
+
+/* ========================================
    PAGINANAVIGATIE (zijbalk)
 ======================================== */
 
@@ -3745,7 +4003,8 @@ const paginaNamen = {
     lessen:   "📚 Lessen",
     hobbies:  "🎮 Hobby's",
     planning: "📋 Planning",
-    kalender: "📅 Kalender"
+    kalender: "📅 Kalender",
+    chat:     "💬 Chat"
 };
 
 
@@ -3786,6 +4045,11 @@ function toonPagina(paginaId) {
 
     // Scroll naar boven
     window.scrollTo(0, 0);
+
+    // Pagina-specifieke acties
+    if (paginaId === "chat") {
+        toonChatStatus();
+    }
 
 }
 
