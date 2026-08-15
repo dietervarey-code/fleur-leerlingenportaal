@@ -2662,6 +2662,9 @@ function openSettings() {
     ).style.display =
         "flex";
 
+    // Notificatieknop bijwerken naar actuele status
+    updateNotificatieKnop();
+
 }
 
 
@@ -2793,6 +2796,15 @@ function initSupabase() {
                 // Weergavenaam ophalen
                 laadProfiel();
 
+                // Notificatiestatus bijwerken
+                updateNotificatieKnop();
+
+                // Globale chatluisteraars starten
+                aboneerOpGlobaleChat();
+
+                // Ongelezen berichten checken
+                controleerOngeLezenBerichten();
+
                 laadVanCloud(function() {
                     toonLessen();
                     toonHobbies();
@@ -2810,6 +2822,13 @@ function initSupabase() {
                             setInterval(updateTimerDisplays, 1000);
                     }
                 });
+
+            } else {
+
+                // Uitgelogd: badges wissen
+                ongeLezenGroep = 0;
+                ongeLezenPrive = 0;
+                updateBadges();
 
             }
 
@@ -3998,6 +4017,9 @@ function laadPriveBerichten() {
         return;
     }
 
+    // Markeer dit privégesprek als gelezen
+    markeerPriveGelezen(huidigPriveChatUserId);
+
     const lijst = document.getElementById("chat-berichten");
 
     if (lijst) {
@@ -4291,6 +4313,9 @@ function laadChatBerichten() {
     if (!supabaseClient) {
         return;
     }
+
+    // Markeer groepschat als gelezen
+    markeerGroepGelezen();
 
     const lijst =
         document.getElementById("chat-berichten");
@@ -4639,6 +4664,372 @@ function openProfielKaartVoorLid(userId, naam) {
 
     if (naamEl) naamEl.textContent = naam;
     if (popup)  popup.style.display = "flex";
+
+}
+
+
+/* ========================================
+   ONGELEZEN BERICHTEN
+======================================== */
+
+let ongeLezenGroep    = 0;
+let ongeLezenPrive    = 0;
+let globalChatKanaal  = null;
+let globalPriveKanaal = null;
+
+
+/* --- Hulpfuncties voor "laatst gezien" tijdstempels --- */
+
+function getLaatstGezienGroep() {
+    return localStorage.getItem("chat-groep-gezien") ||
+        new Date(0).toISOString();
+}
+
+function setLaatstGezienGroep() {
+    localStorage.setItem(
+        "chat-groep-gezien",
+        new Date().toISOString()
+    );
+}
+
+function getLaatstGezienPrive(userId) {
+    return localStorage.getItem("chat-prive-gezien-" + userId) ||
+        new Date(0).toISOString();
+}
+
+function setLaatstGezienPrive(userId) {
+    localStorage.setItem(
+        "chat-prive-gezien-" + userId,
+        new Date().toISOString()
+    );
+}
+
+
+/* --- Badges en homepage widget bijwerken --- */
+
+function updateBadges() {
+
+    const totaal = ongeLezenGroep + ongeLezenPrive;
+
+    // Nav badge chat (groep + privé)
+    const badgeChat = document.getElementById("badge-chat");
+    if (badgeChat) {
+        badgeChat.textContent    = totaal > 9 ? "9+" : String(totaal);
+        badgeChat.style.display  = totaal > 0 ? "inline-flex" : "none";
+    }
+
+    // Nav badge leden (alleen privé)
+    const badgeLeden = document.getElementById("badge-leden");
+    if (badgeLeden) {
+        badgeLeden.textContent   = ongeLezenPrive > 9 ? "9+" : String(ongeLezenPrive);
+        badgeLeden.style.display = ongeLezenPrive > 0 ? "inline-flex" : "none";
+    }
+
+    // Homepage widget
+    const widget = document.getElementById("welkom-ongelezen");
+    const tekst  = document.getElementById("welkom-ongelezen-tekst");
+
+    if (widget) {
+
+        if (totaal > 0) {
+
+            widget.style.display = "flex";
+
+            const delen = [];
+
+            if (ongeLezenGroep > 0) {
+                delen.push(
+                    ongeLezenGroep + " groepsbericht" +
+                    (ongeLezenGroep === 1 ? "" : "en")
+                );
+            }
+
+            if (ongeLezenPrive > 0) {
+                delen.push(
+                    ongeLezenPrive + " privébericht" +
+                    (ongeLezenPrive === 1 ? "" : "en")
+                );
+            }
+
+            if (tekst) {
+                tekst.textContent = "💬 " + delen.join(" · ");
+            }
+
+        } else {
+
+            widget.style.display = "none";
+
+        }
+
+    }
+
+}
+
+
+/* --- Ophalen van ongelezen berichten bij inloggen --- */
+
+function controleerOngeLezenBerichten() {
+
+    if (!supabaseClient || !currentUser) return;
+
+    const mijnId      = currentUser.id;
+    const groepGezien = getLaatstGezienGroep();
+
+    ongeLezenGroep = 0;
+    ongeLezenPrive = 0;
+
+    // Groepschat: berichten die niet van mij zijn en nieuwer dan laasst gezien
+    supabaseClient
+        .from("berichten")
+        .select("id", { count: "exact", head: true })
+        .neq("user_id", mijnId)
+        .gt("aangemaakt_op", groepGezien)
+        .then(function(resultaat) {
+
+            if (!resultaat.error && resultaat.count !== null) {
+                ongeLezenGroep = resultaat.count;
+                updateBadges();
+            }
+
+        });
+
+    // Privéberichten: alle naar mij gericht, gefilterd per afzender
+    supabaseClient
+        .from("prive_berichten")
+        .select("van_user_id, aangemaakt_op")
+        .eq("naar_user_id", mijnId)
+        .then(function(resultaat) {
+
+            if (resultaat.error || !resultaat.data) return;
+
+            let totaal = 0;
+
+            // Groepeer per afzender en tel ongelezen
+            const perAfzender = {};
+
+            resultaat.data.forEach(function(b) {
+                if (!perAfzender[b.van_user_id]) {
+                    perAfzender[b.van_user_id] = [];
+                }
+                perAfzender[b.van_user_id].push(b.aangemaakt_op);
+            });
+
+            Object.keys(perAfzender).forEach(function(vanId) {
+                const gezien   = getLaatstGezienPrive(vanId);
+                const ongelezen =
+                    perAfzender[vanId].filter(function(ts) {
+                        return ts > gezien;
+                    }).length;
+                totaal += ongelezen;
+            });
+
+            ongeLezenPrive = totaal;
+            updateBadges();
+
+        });
+
+}
+
+
+/* --- Globale Realtime luisteraars (actief ook buiten de chatpagina) --- */
+
+function aboneerOpGlobaleChat() {
+
+    if (!supabaseClient || !currentUser) return;
+
+    const mijnId = currentUser.id;
+
+
+    // Groepschat
+    if (!globalChatKanaal) {
+
+        globalChatKanaal =
+            supabaseClient
+                .channel("glob-groep-" + mijnId)
+                .on(
+                    "postgres_changes",
+                    {
+                        event:  "INSERT",
+                        schema: "public",
+                        table:  "berichten"
+                    },
+                    function(payload) {
+
+                        const b = payload.new;
+
+                        // Eigen berichten negeren
+                        if (b.user_id === mijnId) return;
+
+                        // Als de gebruiker nu de groepschat actief heeft → meteen markeer
+                        const chatActief =
+                            document.getElementById("pagina-chat") &&
+                            document.getElementById("pagina-chat")
+                                .classList.contains("actief") &&
+                            !huidigPriveChatUserId;
+
+                        if (chatActief) {
+                            setLaatstGezienGroep();
+                            return;
+                        }
+
+                        ongeLezenGroep++;
+                        updateBadges();
+
+                        stuurBrowserNotificatie(
+                            "💬 " + escapeHtml(b.gebruikersnaam),
+                            b.bericht.substring(0, 100)
+                        );
+
+                    }
+                )
+                .subscribe();
+
+    }
+
+
+    // Privéberichten
+    if (!globalPriveKanaal) {
+
+        globalPriveKanaal =
+            supabaseClient
+                .channel("glob-prive-" + mijnId)
+                .on(
+                    "postgres_changes",
+                    {
+                        event:  "INSERT",
+                        schema: "public",
+                        table:  "prive_berichten"
+                    },
+                    function(payload) {
+
+                        const b = payload.new;
+
+                        // Alleen berichten naar mij
+                        if (b.naar_user_id !== mijnId) return;
+
+                        // Als de gebruiker dit privégesprek nu actief heeft → meteen markeer
+                        const inDitGesprek =
+                            document.getElementById("pagina-chat") &&
+                            document.getElementById("pagina-chat")
+                                .classList.contains("actief") &&
+                            huidigPriveChatUserId === b.van_user_id;
+
+                        if (inDitGesprek) {
+                            setLaatstGezienPrive(b.van_user_id);
+                            return;
+                        }
+
+                        ongeLezenPrive++;
+                        updateBadges();
+
+                        stuurBrowserNotificatie(
+                            "🔒 " + escapeHtml(b.gebruikersnaam),
+                            b.bericht.substring(0, 100)
+                        );
+
+                    }
+                )
+                .subscribe();
+
+    }
+
+}
+
+
+/* --- Als gelezen markeren --- */
+
+function markeerGroepGelezen() {
+    setLaatstGezienGroep();
+    ongeLezenGroep = 0;
+    updateBadges();
+}
+
+
+function markeerPriveGelezen(userId) {
+    if (!userId) return;
+    setLaatstGezienPrive(userId);
+    ongeLezenPrive = Math.max(0, ongeLezenPrive - 1);
+    // Herbereken exact (simpelste correcte aanpak)
+    controleerOngeLezenBerichten();
+}
+
+
+/* ========================================
+   BROWSER NOTIFICATIES
+======================================== */
+
+function updateNotificatieKnop() {
+
+    const knop   = document.getElementById("notificatie-knop");
+    const status = document.getElementById("notificatie-status");
+
+    if (!("Notification" in window)) {
+
+        if (knop)   { knop.textContent = "🚫 Niet ondersteund door browser"; knop.disabled = true; }
+        if (status) status.textContent = "";
+        return;
+
+    }
+
+    if (Notification.permission === "granted") {
+
+        if (knop)   { knop.textContent = "✅ Meldingen aan"; knop.disabled = true; }
+        if (status) { status.textContent = "Je ontvangt meldingen bij nieuwe berichten."; status.style.color = "#27ae60"; }
+
+    } else if (Notification.permission === "denied") {
+
+        if (knop)   { knop.textContent = "🚫 Meldingen geblokkeerd"; knop.disabled = true; }
+        if (status) { status.textContent = "Sta meldingen toe in je browserinstellingen."; status.style.color = "#c0392b"; }
+
+    } else {
+
+        if (knop)   { knop.textContent = "🔔 Meldingen inschakelen"; knop.disabled = false; }
+        if (status) status.textContent = "";
+
+    }
+
+}
+
+
+function vraagNotificatieToestemming() {
+
+    if (!("Notification" in window)) return;
+
+    Notification.requestPermission().then(function() {
+        updateNotificatieKnop();
+    });
+
+}
+
+
+function stuurBrowserNotificatie(titel, tekst) {
+
+    if (!("Notification" in window)) return;
+    if (Notification.permission !== "granted") return;
+
+    // Niet tonen als de app zichtbaar in de voorgrond is
+    if (document.visibilityState === "visible") return;
+
+    try {
+
+        const n = new Notification(titel, {
+            body:  tekst,
+            icon:  "./icons/icon.svg",
+            badge: "./icons/icon.svg",
+            tag:   "chat-bericht"
+        });
+
+        n.onclick = function() {
+            window.focus();
+            toonPagina("chat");
+            n.close();
+        };
+
+        setTimeout(function() { n.close(); }, 7000);
+
+    } catch (e) {
+        // Stil falen
+    }
 
 }
 

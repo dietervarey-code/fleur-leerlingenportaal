@@ -80,11 +80,13 @@
             <button class="nav-item" data-pagina="chat" onclick="toonPagina('chat')">
                 <span class="nav-icoon">💬</span>
                 <span class="nav-label">Chat</span>
+                <span class="ongelezen-badge" id="badge-chat" style="display:none"></span>
             </button>
 
             <button class="nav-item" data-pagina="leden" onclick="toonPagina('leden')">
                 <span class="nav-icoon">👥</span>
                 <span class="nav-label">Leden</span>
+                <span class="ongelezen-badge" id="badge-leden" style="display:none"></span>
             </button>
 
             <button class="nav-item nav-instellingen" onclick="openSettings()">
@@ -123,6 +125,14 @@
 
             <div id="weer-status" class="weer-status">
                 🌡️ Weer laden...
+            </div>
+
+            <!-- Ongelezen berichten widget -->
+            <div id="welkom-ongelezen" class="welkom-ongelezen" style="display:none" onclick="toonPagina('chat')">
+                <div class="welkom-ongelezen-info">
+                    <div class="welkom-ongelezen-tekst" id="welkom-ongelezen-tekst">💬 Ongelezen berichten</div>
+                    <div class="welkom-ongelezen-sub">Tik om te lezen →</div>
+                </div>
             </div>
 
         </section>
@@ -815,6 +825,30 @@
                 <button type="button" class="kleur-swatch" data-kleur="#fbe9e7"  style="background:#fbe9e7"  onclick="kiesMenuKleur('#fbe9e7')"></button>
                 <button type="button" class="kleur-swatch" data-kleur="#fff9c4"  style="background:#fff9c4"  onclick="kiesMenuKleur('#fff9c4')"></button>
             </div>
+
+
+            <!-- NOTIFICATIES -->
+
+            <hr class="instellingen-scheiding">
+
+            <label>🔔 Meldingen</label>
+
+            <p class="sync-uitleg">
+                Ontvang een melding als er een nieuw bericht binnenkomt,
+                ook als de app op de achtergrond staat.
+            </p>
+
+            <button
+                class="notificatie-knop"
+                id="notificatie-knop"
+                onclick="vraagNotificatieToestemming()"
+                type="button">
+                🔔 Meldingen inschakelen
+            </button>
+
+            <p id="notificatie-status" class="sync-status" style="margin-top:6px"></p>
+
+            <hr class="instellingen-scheiding">
 
 
             <!-- RESET -->

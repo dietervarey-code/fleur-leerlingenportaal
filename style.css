@@ -4242,3 +4242,235 @@ section.chat-pagina.actief {
     }
 
 }
+
+
+/* ================================================
+   ONGELEZEN BADGES (op nav-items)
+================================================ */
+
+.ongelezen-badge {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    min-width:
+        20px;
+
+    height:
+        20px;
+
+    padding:
+        0 5px;
+
+    background:
+        #e74c3c;
+
+    color:
+        #fff;
+
+    border-radius:
+        10px;
+
+    font-size:
+        0.7rem;
+
+    font-weight:
+        700;
+
+    margin-left:
+        auto;
+
+    line-height:
+        1;
+
+    animation:
+        badge-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+}
+
+
+@keyframes badge-pop {
+
+    0%   { transform: scale(0); }
+    100% { transform: scale(1); }
+
+}
+
+
+/* ================================================
+   WELKOM ONGELEZEN WIDGET (homepage)
+================================================ */
+
+.welkom-ongelezen {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    background:
+        linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+
+    border-radius:
+        14px;
+
+    padding:
+        14px 18px;
+
+    margin:
+        14px 0 4px;
+
+    color:
+        #fff;
+
+    cursor:
+        pointer;
+
+    box-shadow:
+        0 4px 16px rgba(74, 144, 226, 0.35);
+
+    animation:
+        welkom-pop 0.35s cubic-bezier(0.34, 1.4, 0.64, 1);
+
+    transition:
+        transform 0.15s, box-shadow 0.15s;
+
+}
+
+
+.welkom-ongelezen:hover,
+.welkom-ongelezen:active {
+
+    transform:
+        translateY(-2px);
+
+    box-shadow:
+        0 8px 24px rgba(74, 144, 226, 0.45);
+
+}
+
+
+@keyframes welkom-pop {
+
+    0%   { transform: scale(0.88); opacity: 0; }
+    100% { transform: scale(1);    opacity: 1; }
+
+}
+
+
+.welkom-ongelezen-info {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        3px;
+
+}
+
+
+.welkom-ongelezen-tekst {
+
+    font-size:
+        0.95rem;
+
+    font-weight:
+        700;
+
+}
+
+
+.welkom-ongelezen-sub {
+
+    font-size:
+        0.78rem;
+
+    opacity:
+        0.82;
+
+}
+
+
+/* ================================================
+   NOTIFICATIE KNOP (instellingen)
+================================================ */
+
+.notificatie-knop {
+
+    display:
+        block;
+
+    width:
+        100%;
+
+    padding:
+        11px 16px;
+
+    background:
+        #4a90e2;
+
+    color:
+        #fff;
+
+    border:
+        none;
+
+    border-radius:
+        10px;
+
+    font-size:
+        0.95rem;
+
+    font-weight:
+        600;
+
+    cursor:
+        pointer;
+
+    text-align:
+        center;
+
+    transition:
+        background 0.15s, transform 0.1s;
+
+}
+
+
+.notificatie-knop:hover {
+
+    background:
+        #357abd;
+
+}
+
+
+.notificatie-knop:active {
+
+    transform:
+        scale(0.98);
+
+}
+
+
+.notificatie-knop:disabled {
+
+    background:
+        #7fb3e8;
+
+    cursor:
+        default;
+
+}
