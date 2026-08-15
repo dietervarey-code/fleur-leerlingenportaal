@@ -3781,6 +3781,14 @@ function laadProfiel() {
                     input.value = profielNaam;
                 }
 
+                // Verberg de "geen naam" banner als die zichtbaar is
+                const banner =
+                    document.getElementById("chat-geen-naam");
+
+                if (banner) {
+                    banner.style.display = "none";
+                }
+
             }
 
         });
@@ -3795,11 +3803,7 @@ function haalWeergavenaam() {
         return profielNaam;
     }
 
-    if (currentUser && currentUser.email) {
-        return currentUser.email.split("@")[0];
-    }
-
-    return "Gebruiker";
+    return "Gast";
 
 }
 
@@ -3923,6 +3927,23 @@ function sluitProfielKaart(event) {
 }
 
 
+/* Zet de chat UI in actieve privémodus (header, berichten, realtime) */
+function zetPriveChatModeAan() {
+
+    const terugKnop = document.getElementById("chat-terug-knop");
+    const leegKnop  = document.getElementById("chat-leeg-knop");
+    const titel     = document.getElementById("chat-titel");
+
+    if (terugKnop) terugKnop.style.display = "";
+    if (leegKnop)  leegKnop.style.display  = "";
+    if (titel)     titel.textContent       = "🔒 " + huidigPriveChatNaam;
+
+    laadPriveBerichten();
+    aboneerOpPriveChat();
+
+}
+
+
 /* Opent een privégesprek met de gebruiker op de profielkaart */
 function openPriveChat() {
 
@@ -3937,15 +3958,8 @@ function openPriveChat() {
     const popup = document.getElementById("profiel-kaart");
     if (popup) popup.style.display = "none";
 
-    // Update chat UI
-    const terugKnop = document.getElementById("chat-terug-knop");
-    const titel     = document.getElementById("chat-titel");
-
-    if (terugKnop) terugKnop.style.display = "";
-    if (titel)     titel.textContent       = "🔒 " + huidigPriveChatNaam;
-
-    laadPriveBerichten();
-    aboneerOpPriveChat();
+    // We zijn al op de chatpagina — zet gewoon privémodus aan
+    zetPriveChatModeAan();
 
 }
 
@@ -3957,9 +3971,11 @@ function naarGroepChat() {
     huidigPriveChatNaam   = null;
 
     const terugKnop = document.getElementById("chat-terug-knop");
+    const leegKnop  = document.getElementById("chat-leeg-knop");
     const titel     = document.getElementById("chat-titel");
 
     if (terugKnop) terugKnop.style.display = "none";
+    if (leegKnop)  leegKnop.style.display  = "none";
     if (titel)     titel.textContent       = "💬 Chatroom";
 
     if (privaatKanaal && supabaseClient) {
@@ -3967,7 +3983,10 @@ function naarGroepChat() {
         privaatKanaal = null;
     }
 
+    chatGeladen = false;
     laadChatBerichten();
+    aboneerOpChat();
+    chatGeladen = true;
 
 }
 
@@ -4126,12 +4145,91 @@ function aboneerOpPriveChat() {
 }
 
 
+/* Verwijdert alle berichten van het huidige privégesprek */
+function leegPriveChat() {
+
+    if (!supabaseClient || !currentUser || !huidigPriveChatUserId) {
+        return;
+    }
+
+    if (!confirm("Weet je zeker dat je alle berichten in dit gesprek wil verwijderen?")) {
+        return;
+    }
+
+    const mijnId    = currentUser.id;
+    const andererId = huidigPriveChatUserId;
+
+    supabaseClient
+        .from("prive_berichten")
+        .delete()
+        .or(
+            "and(van_user_id.eq." + mijnId    + ",naar_user_id.eq." + andererId + ")," +
+            "and(van_user_id.eq." + andererId + ",naar_user_id.eq." + mijnId    + ")"
+        )
+        .then(function(resultaat) {
+
+            if (resultaat.error) {
+                console.warn("Chat leegmaken mislukt:", resultaat.error);
+                return;
+            }
+
+            const lijst =
+                document.getElementById("chat-berichten");
+
+            if (lijst) {
+                lijst.innerHTML =
+                    "<p class='chat-leeg'>Gesprek gewist. Stuur het eerste nieuwe bericht! 👋</p>";
+            }
+
+        });
+
+}
+
+
 /* ========================================
    CHAT
 ======================================== */
 
 let chatKanaal       = null;
 let chatGeladen      = false;
+
+
+/* Slimme tijdopmaak: vandaag = "HH:MM", gisteren = "gisteren HH:MM", ouder = "d mnd HH:MM" */
+function formateerChatTijd(datum) {
+
+    const d  = new Date(datum);
+    const nu = new Date();
+
+    function isoDate(dt) {
+        return dt.getFullYear() + "-" +
+               String(dt.getMonth() + 1).padStart(2, "0") + "-" +
+               String(dt.getDate()).padStart(2, "0");
+    }
+
+    const uur = d.toLocaleTimeString("nl-BE", {
+        hour:   "2-digit",
+        minute: "2-digit"
+    });
+
+    if (isoDate(d) === isoDate(nu)) {
+        return uur;
+    }
+
+    const gisteren = new Date(nu);
+    gisteren.setDate(gisteren.getDate() - 1);
+
+    if (isoDate(d) === isoDate(gisteren)) {
+        return "gisteren " + uur;
+    }
+
+    const dagMaand = d.toLocaleDateString("nl-BE", {
+        day:   "numeric",
+        month: "short"
+    });
+
+    return dagMaand + " " + uur;
+
+}
 
 
 /* HTML escapen zodat berichten nooit scripts kunnen injecteren */
@@ -4155,12 +4253,22 @@ function toonChatStatus() {
     const aanmeldMelding =
         document.getElementById("chat-aanmeld-melding");
 
+    const geenNaamBanner =
+        document.getElementById("chat-geen-naam");
+
     if (currentUser) {
 
         if (invoerSectie)    invoerSectie.style.display    = "flex";
         if (aanmeldMelding)  aanmeldMelding.style.display  = "none";
 
-        if (!chatGeladen) {
+        // Banner tonen als er nog geen weergavenaam is ingesteld
+        if (geenNaamBanner) {
+            geenNaamBanner.style.display =
+                profielNaam ? "none" : "flex";
+        }
+
+        // Geen groepschat laden als we al in privémodus zitten
+        if (!huidigPriveChatUserId && !chatGeladen) {
             laadChatBerichten();
             aboneerOpChat();
             chatGeladen = true;
@@ -4170,6 +4278,7 @@ function toonChatStatus() {
 
         if (invoerSectie)    invoerSectie.style.display    = "none";
         if (aanmeldMelding)  aanmeldMelding.style.display  = "block";
+        if (geenNaamBanner)  geenNaamBanner.style.display  = "none";
 
     }
 
@@ -4256,12 +4365,7 @@ function voegChatBerichtToe(b, nieuw) {
     const isEigen =
         currentUser && b.user_id === currentUser.id;
 
-    const tijd =
-        new Date(b.aangemaakt_op)
-            .toLocaleTimeString("nl-BE", {
-                hour:   "2-digit",
-                minute: "2-digit"
-            });
+    const tijd = formateerChatTijd(b.aangemaakt_op);
 
     const div = document.createElement("div");
     div.className =
@@ -4392,6 +4496,26 @@ function aboneerOpChat() {
    LEDEN
 ======================================== */
 
+/* Start een privégesprek direct vanuit de ledenpagina */
+function startPriveChatMetLid(userId, naam) {
+
+    if (!currentUser || userId === currentUser.id) {
+        return;
+    }
+
+    huidigPriveChatUserId = userId;
+    huidigPriveChatNaam   = naam;
+
+    // Navigeer naar de chatpagina (toonChatStatus slaat groepschat over
+    // omdat huidigPriveChatUserId al ingesteld is)
+    toonPagina("chat");
+
+    // Zet privémodus aan
+    zetPriveChatModeAan();
+
+}
+
+
 function laadLeden() {
 
     const grid    = document.getElementById("leden-grid");
@@ -4484,7 +4608,7 @@ function laadLeden() {
                     // Sluit userId en naam op via closure
                     (function(userId, naam) {
                         knop.addEventListener("click", function() {
-                            openProfielKaartVoorLid(userId, naam);
+                            startPriveChatMetLid(userId, naam);
                         });
                     }(lid.user_id, lid.naam));
 

@@ -213,7 +213,7 @@
         <!-- CHAT -->
         <section id="pagina-chat" class="pagina chat-pagina">
 
-            <!-- Chat koptekst met eventuele terugknop -->
+            <!-- Chat koptekst met eventuele terugknop en wis-knop -->
             <div class="chat-header">
                 <button
                     id="chat-terug-knop"
@@ -223,6 +223,21 @@
                     ← Terug
                 </button>
                 <h2 id="chat-titel">💬 Chatroom</h2>
+                <button
+                    id="chat-leeg-knop"
+                    class="chat-leeg-knop"
+                    onclick="leegPriveChat()"
+                    style="display:none"
+                    title="Gesprek leegmaken">
+                    🗑️
+                </button>
+            </div>
+
+            <!-- Waarschuwing als er geen naam ingesteld is -->
+            <div id="chat-geen-naam" class="chat-geen-naam" style="display:none">
+                ⚠️ Stel eerst een
+                <button class="chat-geen-naam-knop" onclick="openSettings()">weergavenaam</button>
+                in zodat anderen je kennen.
             </div>
 
             <!-- Niet aangemeld -->
@@ -242,6 +257,7 @@
                     class="tekst-invoer chat-tekst-invoer"
                     placeholder="Typ een bericht..."
                     maxlength="500"
+                    autocomplete="off"
                     onkeydown="if(event.key==='Enter'&&!event.shiftKey){stuurChatBericht();event.preventDefault();}"
                 >
                 <button
@@ -668,6 +684,7 @@
                     class="tekst-invoer naam-invoer"
                     placeholder="Bijv. Fleur"
                     maxlength="30"
+                    autocomplete="off"
                     onkeydown="if(event.key==='Enter') slaProfielNaamOp()"
                 >
 

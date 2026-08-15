@@ -3562,6 +3562,117 @@ section {
 }
 
 
+/* Wis-knop voor privéchat */
+.chat-leeg-knop {
+
+    padding:
+        7px 10px;
+
+    font-size:
+        18px;
+
+    background-color:
+        rgba(231, 76, 60, 0.10);
+
+    border-radius:
+        10px;
+
+    flex-shrink:
+        0;
+
+    line-height:
+        1;
+
+}
+
+
+.chat-leeg-knop:hover {
+
+    background-color:
+        rgba(231, 76, 60, 0.22);
+
+    opacity:
+        1;
+
+    transform:
+        none;
+
+}
+
+
+/* Waarschuwing bij ontbrekende naam */
+.chat-geen-naam {
+
+    font-size:
+        13px;
+
+    color:
+        #b7770a;
+
+    background-color:
+        #fff8e1;
+
+    border-radius:
+        10px;
+
+    padding:
+        9px 14px;
+
+    flex-shrink:
+        0;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        6px;
+
+    flex-wrap:
+        wrap;
+
+}
+
+
+.chat-geen-naam-knop {
+
+    background:
+        none;
+
+    color:
+        #2a6dd9;
+
+    padding:
+        0;
+
+    font-size:
+        13px;
+
+    font-weight:
+        bold;
+
+    text-decoration:
+        underline;
+
+    border-radius:
+        0;
+
+}
+
+
+.chat-geen-naam-knop:hover {
+
+    opacity:
+        0.7;
+
+    transform:
+        none;
+
+}
+
+
 /* Naam van andere gebruiker: klikbaar */
 .chat-naam.klikbaar {
 
