@@ -4389,6 +4389,137 @@ function aboneerOpChat() {
 
 
 /* ========================================
+   LEDEN
+======================================== */
+
+function laadLeden() {
+
+    const grid    = document.getElementById("leden-grid");
+    const melding = document.getElementById("leden-aanmeld-melding");
+
+    if (!currentUser) {
+
+        if (grid)    grid.innerHTML    = "";
+        if (melding) melding.style.display = "block";
+        return;
+
+    }
+
+    if (melding) melding.style.display = "none";
+
+    if (grid) {
+        grid.innerHTML = "<p class='leeg'>⏳ Leden laden…</p>";
+    }
+
+    if (!supabaseClient) {
+        if (grid) grid.innerHTML = "<p class='leeg'>Supabase niet beschikbaar.</p>";
+        return;
+    }
+
+    supabaseClient
+        .from("profielen")
+        .select("user_id, naam")
+        .order("naam", { ascending: true })
+        .then(function(resultaat) {
+
+            if (!grid) return;
+
+            if (resultaat.error) {
+
+                grid.innerHTML =
+                    "<p class='leeg'>⚠️ Leden niet beschikbaar. " +
+                    "Zorg dat de tabel 'profielen' bestaat.</p>";
+
+                return;
+
+            }
+
+            const leden = resultaat.data || [];
+
+            if (leden.length === 0) {
+
+                grid.innerHTML =
+                    "<p class='leeg'>Nog geen leden gevonden. " +
+                    "Stel een naam in via ⚙️ Instellingen!</p>";
+
+                return;
+
+            }
+
+            grid.innerHTML = "";
+
+            leden.forEach(function(lid) {
+
+                const isEigen =
+                    currentUser && lid.user_id === currentUser.id;
+
+                // Kaart opbouwen via DOM (voorkomt XSS bij speciale tekens in naam)
+                const kaart = document.createElement("div");
+                kaart.className =
+                    "lid-kaart" + (isEigen ? " eigen-kaart" : "");
+
+                const avatar = document.createElement("div");
+                avatar.className = "lid-kaart-avatar";
+                avatar.textContent = "👤";
+
+                const naamDiv = document.createElement("div");
+                naamDiv.className = "lid-kaart-naam";
+                naamDiv.textContent = lid.naam;
+
+                if (isEigen) {
+                    const badge = document.createElement("span");
+                    badge.className   = "lid-jij-badge";
+                    badge.textContent = "jij";
+                    naamDiv.appendChild(badge);
+                }
+
+                kaart.appendChild(avatar);
+                kaart.appendChild(naamDiv);
+
+                if (!isEigen) {
+                    const knop = document.createElement("button");
+                    knop.className   = "lid-kaart-knop";
+                    knop.textContent = "💬 Chat";
+
+                    // Sluit userId en naam op via closure
+                    (function(userId, naam) {
+                        knop.addEventListener("click", function() {
+                            openProfielKaartVoorLid(userId, naam);
+                        });
+                    }(lid.user_id, lid.naam));
+
+                    kaart.appendChild(knop);
+                }
+
+                grid.appendChild(kaart);
+
+            });
+
+        });
+
+}
+
+
+/* Opent de profielkaart vanuit de ledenpagina */
+function openProfielKaartVoorLid(userId, naam) {
+
+    if (!currentUser || userId === currentUser.id) {
+        return;
+    }
+
+    profielKaartUserId = userId;
+    profielKaartNaam   = naam;
+
+    const popup  = document.getElementById("profiel-kaart");
+    const naamEl = document.getElementById("profiel-kaart-naam");
+
+    if (naamEl) naamEl.textContent = naam;
+    if (popup)  popup.style.display = "flex";
+
+}
+
+
+/* ========================================
    PAGINANAVIGATIE (zijbalk)
 ======================================== */
 
@@ -4398,7 +4529,8 @@ const paginaNamen = {
     hobbies:  "🎮 Hobby's",
     planning: "📋 Planning",
     kalender: "📅 Kalender",
-    chat:     "💬 Chat"
+    chat:     "💬 Chat",
+    leden:    "👥 Leden"
 };
 
 
@@ -4446,6 +4578,10 @@ function toonPagina(paginaId) {
     // Pagina-specifieke acties
     if (paginaId === "chat") {
         toonChatStatus();
+    }
+
+    if (paginaId === "leden") {
+        laadLeden();
     }
 
 }

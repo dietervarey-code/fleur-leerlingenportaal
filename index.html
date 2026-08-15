@@ -82,6 +82,11 @@
                 <span class="nav-label">Chat</span>
             </button>
 
+            <button class="nav-item" data-pagina="leden" onclick="toonPagina('leden')">
+                <span class="nav-icoon">👥</span>
+                <span class="nav-label">Leden</span>
+            </button>
+
             <button class="nav-item nav-instellingen" onclick="openSettings()">
                 <span class="nav-icoon">⚙️</span>
                 <span class="nav-label">Instellingen</span>
@@ -246,6 +251,29 @@
                     ➤
                 </button>
             </div>
+
+        </section>
+
+        <!-- LEDEN -->
+        <section id="pagina-leden" class="pagina">
+
+            <div class="section-title">
+                <h2>👥 Leden</h2>
+            </div>
+
+            <p class="leden-uitleg">
+                Alle leden die zich hebben aangemeld en een naam hebben ingesteld.
+                Klik op een lid om een privégesprek te starten.
+            </p>
+
+            <!-- Niet aangemeld -->
+            <div id="leden-aanmeld-melding" class="chat-aanmeld-melding" style="display:none">
+                <p>🔐 Je moet eerst aanmelden om de leden te bekijken.</p>
+                <button onclick="openSettings()">⚙️ Aanmelden via instellingen</button>
+            </div>
+
+            <!-- Ledenrooster -->
+            <div id="leden-grid" class="leden-grid"></div>
 
         </section>
 
