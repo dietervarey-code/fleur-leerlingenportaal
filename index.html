@@ -208,7 +208,17 @@
         <!-- CHAT -->
         <section id="pagina-chat" class="pagina chat-pagina">
 
-            <h2>💬 Chatroom</h2>
+            <!-- Chat koptekst met eventuele terugknop -->
+            <div class="chat-header">
+                <button
+                    id="chat-terug-knop"
+                    class="chat-terug-knop"
+                    onclick="naarGroepChat()"
+                    style="display:none">
+                    ← Terug
+                </button>
+                <h2 id="chat-titel">💬 Chatroom</h2>
+            </div>
 
             <!-- Niet aangemeld -->
             <div id="chat-aanmeld-melding" class="chat-aanmeld-melding" style="display:none">
@@ -617,6 +627,34 @@
                 style="display:none"
                 onchange="verwerkProfielFoto(this.files[0])">
 
+
+            <!-- WEERGAVENAAM -->
+
+            <label for="profiel-naam">👤 Weergavenaam in chat</label>
+
+            <div class="naam-opslaan-rij">
+
+                <input
+                    type="text"
+                    id="profiel-naam"
+                    class="tekst-invoer naam-invoer"
+                    placeholder="Bijv. Fleur"
+                    maxlength="30"
+                    onkeydown="if(event.key==='Enter') slaProfielNaamOp()"
+                >
+
+                <button
+                    class="naam-opslaan-knop"
+                    onclick="slaProfielNaamOp()"
+                    type="button"
+                    title="Naam opslaan">
+                    💾
+                </button>
+
+            </div>
+
+            <p id="naam-opslaan-status" class="naam-opslaan-status"></p>
+
             <hr class="instellingen-scheiding">
 
 
@@ -742,6 +780,26 @@
 
                 🔄 Kleuren resetten
 
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- PROFIELKAART POPUP (verschijnt bij klikken op naam in chat) -->
+    <div id="profiel-kaart" class="profiel-kaart-popup" style="display:none" onclick="sluitProfielKaart(event)">
+
+        <div class="profiel-kaart-inhoud">
+
+            <div class="profiel-kaart-avatar">👤</div>
+
+            <div class="profiel-kaart-naam" id="profiel-kaart-naam"></div>
+
+            <button
+                class="profiel-kaart-chat-knop"
+                onclick="openPriveChat()">
+                💬 Stuur privébericht
             </button>
 
         </div>

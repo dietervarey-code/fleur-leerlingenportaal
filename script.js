@@ -2778,10 +2778,20 @@ function initSupabase() {
 
             toonAanmeldStatus(currentUser);
 
+            // Reset naam bij uitloggen
+            if (!currentUser) {
+                profielNaam = "";
+                const input = document.getElementById("profiel-naam");
+                if (input) input.value = "";
+            }
+
             // Chat bijwerken bij login/logout
             toonChatStatus();
 
             if (currentUser) {
+
+                // Weergavenaam ophalen
+                laadProfiel();
 
                 laadVanCloud(function() {
                     toonLessen();
@@ -3740,6 +3750,383 @@ function toonKalender() {
 
 
 /* ========================================
+   PROFIEL (weergavenaam)
+======================================== */
+
+let profielNaam = "";
+
+
+/* Laadt eigen weergavenaam uit Supabase */
+function laadProfiel() {
+
+    if (!supabaseClient || !currentUser) {
+        return;
+    }
+
+    supabaseClient
+        .from("profielen")
+        .select("naam")
+        .eq("user_id", currentUser.id)
+        .maybeSingle()
+        .then(function(resultaat) {
+
+            if (resultaat.data && resultaat.data.naam) {
+
+                profielNaam = resultaat.data.naam;
+
+                const input =
+                    document.getElementById("profiel-naam");
+
+                if (input) {
+                    input.value = profielNaam;
+                }
+
+            }
+
+        });
+
+}
+
+
+/* Geeft de weergavenaam terug */
+function haalWeergavenaam() {
+
+    if (profielNaam) {
+        return profielNaam;
+    }
+
+    if (currentUser && currentUser.email) {
+        return currentUser.email.split("@")[0];
+    }
+
+    return "Gebruiker";
+
+}
+
+
+/* Slaat de weergavenaam op in Supabase */
+function slaProfielNaamOp() {
+
+    const input =
+        document.getElementById("profiel-naam");
+
+    const status =
+        document.getElementById("naam-opslaan-status");
+
+    const naam = input ? input.value.trim() : "";
+
+    if (!naam) {
+
+        if (status) {
+            status.textContent  = "⚠️ Vul een naam in.";
+            status.style.color  = "#c0392b";
+        }
+
+        return;
+
+    }
+
+    if (!supabaseClient || !currentUser) {
+
+        if (status) {
+            status.textContent  = "⚠️ Eerst aanmelden.";
+            status.style.color  = "#c0392b";
+        }
+
+        return;
+
+    }
+
+    if (status) {
+        status.textContent  = "⏳ Opslaan…";
+        status.style.color  = "#888";
+    }
+
+    supabaseClient
+        .from("profielen")
+        .upsert({
+            user_id: currentUser.id,
+            naam:    naam
+        })
+        .then(function(resultaat) {
+
+            if (resultaat.error) {
+
+                if (status) {
+                    status.textContent  = "⚠️ Opslaan mislukt.";
+                    status.style.color  = "#c0392b";
+                }
+
+            } else {
+
+                profielNaam = naam;
+
+                if (status) {
+                    status.textContent  = "✅ Naam opgeslagen!";
+                    status.style.color  = "#27ae60";
+
+                    setTimeout(function() {
+                        status.textContent = "";
+                    }, 2500);
+                }
+
+            }
+
+        });
+
+}
+
+
+/* ========================================
+   PRIVÉCHAT
+======================================== */
+
+let huidigPriveChatUserId  = null;
+let huidigPriveChatNaam    = null;
+let privaatKanaal          = null;
+let profielKaartUserId     = null;
+let profielKaartNaam       = null;
+
+
+/* Toont de profielkaart van een andere gebruiker */
+function toonProfielKaart(el) {
+
+    const userId = el.dataset.userId;
+    const naam   = el.dataset.naam;
+
+    // Eigen naam negeren; geen kaart in privémodus
+    if (!userId || !currentUser || userId === currentUser.id) {
+        return;
+    }
+
+    profielKaartUserId = userId;
+    profielKaartNaam   = naam;
+
+    const popup  = document.getElementById("profiel-kaart");
+    const naamEl = document.getElementById("profiel-kaart-naam");
+
+    if (naamEl) naamEl.textContent = naam;
+    if (popup)  popup.style.display = "flex";
+
+}
+
+
+/* Sluit de profielkaart (alleen bij klik op de overlay) */
+function sluitProfielKaart(event) {
+
+    const popup = document.getElementById("profiel-kaart");
+
+    if (event.target === popup) {
+        popup.style.display = "none";
+    }
+
+}
+
+
+/* Opent een privégesprek met de gebruiker op de profielkaart */
+function openPriveChat() {
+
+    if (!profielKaartUserId || !profielKaartNaam) {
+        return;
+    }
+
+    huidigPriveChatUserId = profielKaartUserId;
+    huidigPriveChatNaam   = profielKaartNaam;
+
+    // Sluit de profielkaart
+    const popup = document.getElementById("profiel-kaart");
+    if (popup) popup.style.display = "none";
+
+    // Update chat UI
+    const terugKnop = document.getElementById("chat-terug-knop");
+    const titel     = document.getElementById("chat-titel");
+
+    if (terugKnop) terugKnop.style.display = "";
+    if (titel)     titel.textContent       = "🔒 " + huidigPriveChatNaam;
+
+    laadPriveBerichten();
+    aboneerOpPriveChat();
+
+}
+
+
+/* Keert terug naar de groepschat */
+function naarGroepChat() {
+
+    huidigPriveChatUserId = null;
+    huidigPriveChatNaam   = null;
+
+    const terugKnop = document.getElementById("chat-terug-knop");
+    const titel     = document.getElementById("chat-titel");
+
+    if (terugKnop) terugKnop.style.display = "none";
+    if (titel)     titel.textContent       = "💬 Chatroom";
+
+    if (privaatKanaal && supabaseClient) {
+        supabaseClient.removeChannel(privaatKanaal);
+        privaatKanaal = null;
+    }
+
+    laadChatBerichten();
+
+}
+
+
+/* Laadt privéberichten met de huidige gesprekspartner */
+function laadPriveBerichten() {
+
+    if (!supabaseClient || !currentUser || !huidigPriveChatUserId) {
+        return;
+    }
+
+    const lijst = document.getElementById("chat-berichten");
+
+    if (lijst) {
+        lijst.innerHTML =
+            "<p class='chat-laden'>⏳ Berichten laden…</p>";
+    }
+
+    const mijnId    = currentUser.id;
+    const andererId = huidigPriveChatUserId;
+
+    supabaseClient
+        .from("prive_berichten")
+        .select("*")
+        .or(
+            "and(van_user_id.eq." + mijnId    + ",naar_user_id.eq." + andererId + ")," +
+            "and(van_user_id.eq." + andererId + ",naar_user_id.eq." + mijnId    + ")"
+        )
+        .order("aangemaakt_op", { ascending: true })
+        .limit(80)
+        .then(function(resultaat) {
+
+            if (!lijst) return;
+
+            if (resultaat.error) {
+
+                lijst.innerHTML =
+                    "<p class='chat-fout'>" +
+                    "⚠️ Privéberichten niet beschikbaar. " +
+                    "Zorg dat de tabel 'prive_berichten' aangemaakt is." +
+                    "</p>";
+
+                return;
+
+            }
+
+            lijst.innerHTML = "";
+
+            const berichten = resultaat.data || [];
+
+            if (berichten.length === 0) {
+
+                lijst.innerHTML =
+                    "<p class='chat-leeg'>Nog geen berichten. Stuur het eerste bericht! 👋</p>";
+
+            } else {
+
+                berichten.forEach(function(b) {
+                    voegChatBerichtToe({
+                        user_id:        b.van_user_id,
+                        gebruikersnaam: b.gebruikersnaam,
+                        bericht:        b.bericht,
+                        aangemaakt_op:  b.aangemaakt_op
+                    }, false);
+                });
+
+            }
+
+            scrollChatNaarOnder();
+
+        });
+
+}
+
+
+/* Verstuurt een privébericht naar Supabase */
+function stuurPriveBericht(tekst) {
+
+    if (!supabaseClient || !currentUser || !huidigPriveChatUserId) {
+        return;
+    }
+
+    supabaseClient
+        .from("prive_berichten")
+        .insert({
+            van_user_id:    currentUser.id,
+            naar_user_id:   huidigPriveChatUserId,
+            gebruikersnaam: haalWeergavenaam(),
+            bericht:        tekst
+        })
+        .then(function(resultaat) {
+
+            if (resultaat.error) {
+                console.warn("Privébericht sturen mislukt:", resultaat.error);
+            }
+
+        });
+
+}
+
+
+/* Abonneert op nieuwe privéberichten via Supabase Realtime */
+function aboneerOpPriveChat() {
+
+    if (!supabaseClient || !currentUser || !huidigPriveChatUserId) {
+        return;
+    }
+
+    if (privaatKanaal) {
+        supabaseClient.removeChannel(privaatKanaal);
+    }
+
+    const mijnId    = currentUser.id;
+    const andererId = huidigPriveChatUserId;
+
+    // Kanaalnaam gesorteerd zodat beide kanten hetzelfde kanaal gebruiken
+    const kanaalnaam =
+        "prive-" + [mijnId, andererId].sort().join("-");
+
+    privaatKanaal =
+        supabaseClient
+            .channel(kanaalnaam)
+            .on(
+                "postgres_changes",
+                {
+                    event:  "INSERT",
+                    schema: "public",
+                    table:  "prive_berichten"
+                },
+                function(payload) {
+
+                    const b = payload.new;
+
+                    // Alleen berichten van dit gesprek tonen
+                    const relevant =
+                        (b.van_user_id === mijnId    && b.naar_user_id === andererId) ||
+                        (b.van_user_id === andererId && b.naar_user_id === mijnId);
+
+                    if (relevant && huidigPriveChatUserId) {
+
+                        voegChatBerichtToe({
+                            user_id:        b.van_user_id,
+                            gebruikersnaam: b.gebruikersnaam,
+                            bericht:        b.bericht,
+                            aangemaakt_op:  b.aangemaakt_op
+                        }, true);
+
+                        scrollChatNaarOnder();
+
+                    }
+
+                }
+            )
+            .subscribe();
+
+}
+
+
+/* ========================================
    CHAT
 ======================================== */
 
@@ -3886,7 +4273,10 @@ function voegChatBerichtToe(b, nieuw) {
 
     div.innerHTML =
         (!isEigen
-            ? "<div class='chat-naam'>" +
+            ? "<div class='chat-naam klikbaar'" +
+              " data-user-id='" + escapeHtml(b.user_id) + "'" +
+              " data-naam='" + escapeHtml(b.gebruikersnaam) + "'" +
+              " onclick='toonProfielKaart(this)'>" +
               escapeHtml(b.gebruikersnaam) +
               "</div>"
             : "") +
@@ -3913,7 +4303,7 @@ function scrollChatNaarOnder() {
 }
 
 
-/* Verstuurt een nieuw bericht naar Supabase */
+/* Verstuurt een nieuw bericht (groep of privé) */
 function stuurChatBericht() {
 
     if (!supabaseClient || !currentUser) {
@@ -3930,29 +4320,33 @@ function stuurChatBericht() {
         return;
     }
 
-    // Gebruikersnaam: deel voor @ in het e-mailadres
-    const naam =
-        currentUser.email.split("@")[0];
-
     invoer.value = "";
     invoer.focus();
+
+    // Routeer naar privé of groepschat
+    if (huidigPriveChatUserId) {
+        stuurPriveBericht(tekst);
+    } else {
+        stuurGroepsBericht(tekst);
+    }
+
+}
+
+
+/* Verstuurt een groepsbericht */
+function stuurGroepsBericht(tekst) {
 
     supabaseClient
         .from("berichten")
         .insert({
             user_id:        currentUser.id,
-            gebruikersnaam: naam,
+            gebruikersnaam: haalWeergavenaam(),
             bericht:        tekst
         })
         .then(function(resultaat) {
 
             if (resultaat.error) {
-
-                console.warn(
-                    "Bericht sturen mislukt:",
-                    resultaat.error
-                );
-
+                console.warn("Bericht sturen mislukt:", resultaat.error);
             }
 
         });
